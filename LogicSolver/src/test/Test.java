@@ -1,4 +1,4 @@
-package Testers;
+package test;
 import objects.LogicBoard;
 import rules.RuleManager;
 import solver.Solver;
