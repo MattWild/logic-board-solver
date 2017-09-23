@@ -3,7 +3,22 @@ import java.util.ArrayList;
 
 import exceptions.SetupException;
 
+/**
+ * This class defines the concept of a string category, string categories have
+ * strings for options
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class StringCategory extends Category{	
+	
+	/**
+	 * 
+	 * @param name
+	 * @param elementNumber
+	 */
+	
 	public StringCategory(String name, int elementNumber) {
 		super(name, elementNumber);
 	}

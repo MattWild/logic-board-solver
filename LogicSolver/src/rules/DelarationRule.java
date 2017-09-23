@@ -5,6 +5,14 @@ import objects.Category;
 import objects.LogicBoard;
 import objects.SubBoard;
 
+/**
+ * This class defines a declaration rule, one that defines the 
+ * relationship between two options as either an 'X' or 'O'
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class DelarationRule implements Rule {
 	
 	String category1;
@@ -12,6 +20,11 @@ public class DelarationRule implements Rule {
 	String option1;
 	String option2;
 	int value;
+	
+	/**
+	 * 
+	 * @param string
+	 */
 	
 	public DelarationRule(String string) {
 		String[] x = string.split(" ");

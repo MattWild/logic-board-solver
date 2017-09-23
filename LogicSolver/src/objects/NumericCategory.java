@@ -3,11 +3,25 @@ import java.util.ArrayList;
 
 import exceptions.SetupException;
 
+/**
+ * This class defines the concept of a numeric category, numeric categories are 
+ * able to accomodate relationships between their integer values
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class NumericCategory extends Category {
 	
 	private ArrayList<Relation> relations;
 	private ArrayList<Relation> relationsToDelete;
 
+	/**
+	 * 
+	 * @param name
+	 * @param elementNumber
+	 */
+	
 	public NumericCategory(String name, int elementNumber) {
 		super(name, elementNumber);
 		relations = new ArrayList<Relation>();
@@ -30,17 +44,36 @@ public class NumericCategory extends Category {
 		throw(new SetupException("option: " + option + " not found in category: " + name));
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	
 	public ArrayList<Relation> getRelations() {
 		return relations;
 	}
+	
+	/**
+	 * 
+	 * @param relation
+	 */
 	
 	public void addRelation(Relation relation) {
 		relations.add(relation);
 	}
 	
+	/**
+	 * 
+	 * @param relation
+	 */
+	
 	public void markRelationForDeletion(Relation relation) {
 		relationsToDelete.add(relation);
 	}
+	
+	/**
+	 * 
+	 */
 	
 	public void deleteRelations() {
 		Relation r;

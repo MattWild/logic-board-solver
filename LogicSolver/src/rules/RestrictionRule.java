@@ -4,6 +4,15 @@ import exceptions.SolvingException;
 import objects.Category;
 import objects.LogicBoard;
 
+/**
+ * This class defines a restriction rule, one that limits the 
+ * possible links for a given option to an either or situation
+ * (requires two rules)
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class RestrictionRule implements Rule {
 	
 	String categoryToRestrict;
@@ -11,6 +20,11 @@ public class RestrictionRule implements Rule {
 	String optionToRestrict;
 	String targetOption;
 
+	/**
+	 * 
+	 * @param string
+	 */
+	
 	public RestrictionRule(String string) {
 		String[] x = string.split(" ");
 		
@@ -19,6 +33,7 @@ public class RestrictionRule implements Rule {
 		optionToRestrict = x[2];
 		targetOption = x[3];
 	}
+	
 
 	@Override
 	public void applyTo(LogicBoard lb) throws SolvingException, SetupException {

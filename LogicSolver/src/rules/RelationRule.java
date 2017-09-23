@@ -8,6 +8,15 @@ import objects.LogicBoard;
 import objects.Relation;
 import objects.SubBoard;
 
+/**
+ * This class defines a relation rule, one that relates the values
+ * from a numerical class for two other options by an equation or 
+ * inequality
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class RelationRule implements Rule {
 	
 	String mainCategory;
@@ -16,6 +25,11 @@ public class RelationRule implements Rule {
 	String option1;
 	String option2;
 	int difference;
+	
+	/**
+	 * 
+	 * @param string
+	 */
 
 	public RelationRule(String string) {
 		String[] x = string.split(" ");

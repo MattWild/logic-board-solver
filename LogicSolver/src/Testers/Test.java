@@ -5,8 +5,48 @@ import solver.Solver;
 
 public class Test {
 	public static void main(String[] args) {
+		/*
+		 * Parameter Inputs:
+		 * 
+		 * numberOfOptions:
+		 * 		defines the number of distinct objects there for the puzzle
+		 * 
+		 * categories:
+		 * 		names and defines each category in puzzle
+		 * 		"STRINGNAME TYPE" where TYPE is 1 (String Category),
+		 * 		2 (Numerical Category), or 3 (Ordered Category)
+		 * 
+		 * options:
+		 * 		names options for each of the categories, numerical 
+		 * 		categories must have positive integer options
+		 * 
+		 * rules:
+		 * 		defines different rules to apply that describe the 
+		 * 		initial 'hints' that a logic puzzle comes with, each
+		 * 		rule string begins with an integer describing its type
+		 * 
+		 * 		Declaration Rule: "0 CATEGORY1 CATEGORY2 OPTION1 OPTION2 VALUE"
+		 * 			'marks' subboard for CATEGORY1 and CATEGORY2 at
+		 * 			OPTION1 and OPTION2 with VALUE (1 for 'O' and -1 
+		 * 			for 'X')
+		 * 
+		 * 		Restriction Rule: "1 CATEGORY1 CATEGORY2 OPTION1 OPTION2"
+		 * 			declares OPTION2 from CATEGORY2 to be one of the 
+		 * 			possible hits for OPTION1 from CATEGORY2. Combine
+		 * 			with another Restriction Rule to define an 'either
+		 * 			or' situation
+		 * 		
+		 * 		Relation Rule: "2 NUMERICCATEGORY CATEGORY1 CATEGORY2 OPTION1 OPTION2 VALUE"
+		 * 			declares that the value in NUMERICCATEGORY for OPTION1
+		 * 			in CATEGORY1 is VALUE units less than the value in NUMERICCATEGORY
+		 * 			for OPTION2 in CATEGORY2. If VALUE is 0 than the solver 
+		 * 			will understand that as a general 'less then' relation 
+		 * 			instead of a specific number of units offset.
+		 */
 		int numberOfOptions = 7;
+		
 		String[] categories = {"weights 1","orders 1","nations 0", "competitors 0"};
+		
 		String[][] options = {
 				{"880","920","960","1000","1040","1080","1120"},
 				{"1","2","3","4","5","6","7"},
@@ -53,6 +93,7 @@ public class Test {
 				"0 orders nations 7 SA -1"
 				};
 		
+		/* NO INPUT MODIFICATIONS AFTER THIS POINT*/
 	
 		LogicBoard lb = new LogicBoard(numberOfOptions, categories, options);
 		RuleManager rm = new RuleManager(rules);

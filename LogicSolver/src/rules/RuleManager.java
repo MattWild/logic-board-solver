@@ -5,6 +5,14 @@ import exceptions.SetupException;
 import exceptions.SolvingException;
 import objects.LogicBoard;
 
+/**
+ * This class parses a list of rules as strings and stores them
+ * until asked to apply them to a logic board
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class RuleManager {
 	
 	ArrayList<Rule> rules;
@@ -14,6 +22,12 @@ public class RuleManager {
 		 for (String rule : ruleList) 
 			 addRule(rule);
 	}
+	
+	/**
+	 * constructs a new rule of specific type from a formatted string
+	 * 
+	 * @param ruleString
+	 */
 	
 	public void addRule(String ruleString) {
 		int type = Integer.parseInt(ruleString.substring(0,1));
@@ -35,6 +49,13 @@ public class RuleManager {
 		
 		rules.add(rule);
 	}
+	
+	/**
+	 * 
+	 * @param lb
+	 * @throws SolvingException
+	 * @throws SetupException
+	 */
 
 	public void applyRulesTo(LogicBoard lb) throws SolvingException, SetupException {
 		for (Rule r : rules)

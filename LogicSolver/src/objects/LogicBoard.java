@@ -3,11 +3,25 @@ import java.util.ArrayList;
 
 import exceptions.SetupException;
 
+/**
+ * This class describes the board for a logic puzzle and the
+ * categories involved.
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class LogicBoard {
 
 	private ArrayList<Category> categories;
 	private int elementNumber = -1;
-	private int unsolved = -1;
+	
+	/**
+	 * 
+	 * @param elementNumber
+	 * @param categories
+	 * @param options
+	 */
 	
 	public LogicBoard(int elementNumber, String[] categories, String[][] options) {
 		this.elementNumber = elementNumber;
@@ -30,9 +44,19 @@ public class LogicBoard {
 		}
 	}
 	
+	/**
+	 * 
+	 */
+	
 	public ArrayList<Category> getCategories() {
 		return categories;
 	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 */
 
 	public Category getCategory(String name) {
 		Category cat = null;
@@ -44,6 +68,15 @@ public class LogicBoard {
 		return null;
 	}
 
+	/**
+	 * sets up new category and adds it to categories list based
+	 * 
+	 * @param name
+	 * @param type
+	 * @return
+	 * @throws SetupException
+	 */
+	
 	private Category createCategory(String name, int type) throws SetupException {
 		if (elementNumber == -1) {
 			throw(new SetupException("element number not set"));
@@ -58,18 +91,22 @@ public class LogicBoard {
 		this.categories.add(newCategory);
 		return newCategory;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
 
 	public int getElementNumber() {
 		return elementNumber;
 	}
 	
-	public int getUnsolved() {
-		return unsolved;
-	}
-	
-	public void decrementUnsolved() {
-		unsolved--;
-	}
+	/**
+	 * creates boards for each pairing of categories and validates
+	 * that the categories are correctly populated
+	 * 
+	 * @throws SetupException
+	 */
 	
 	public void initialize() throws SetupException {
 		Category cat1, cat2;
@@ -79,18 +116,26 @@ public class LogicBoard {
 			cat1.validate();
 			for (int j = i + 1; j < categories.size(); j++) {
 				cat2 = categories.get(j);
+				cat2.validate();
 				SubBoard board = new SubBoard(cat1, cat2, elementNumber);
 				cat1.addBoard(board);
 				boardCount++;
 			}
 		}
-		unsolved = elementNumber * elementNumber * boardCount;
 	}
+	
+	/**
+	 * prints full summary of logic board
+	 */
 	
 	public void printFull() {
 		printCategorySummary();
 		printSnapshot();
 	}
+	
+	/**
+	 * prints output of categories and their options
+	 */
 	
 	public void printCategorySummary() {
 		String str = "";
@@ -112,6 +157,10 @@ public class LogicBoard {
 		
 		System.out.println(str);
 	}
+	
+	/**
+	 * prints output of logic board at current stage of evolution
+	 */
 	
 	public void printSnapshot() {
 		String str = "";

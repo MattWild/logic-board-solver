@@ -3,13 +3,29 @@ import java.util.ArrayList;
 
 import exceptions.SolvingException;
 
+/**
+ * This class defines and implements a subboard of a larger logic board, 
+ * a subboard is defined by two categories and represents the grid of hits/links
+ * 'O's and misses 'X's implied by the logic puzzle.
+ * 
+ * @author matthiaswilder
+ *
+ */
+
 public class SubBoard {
 	
 	private Category cat1;
 	private Category cat2;
 	private int[][] board;
 	private ArrayList<Integer[]> hitQueue = new ArrayList<Integer[]>();
-	private ArrayList<Integer[]> linkList = new ArrayList<Integer[]>();
+	private ArrayList<Integer[]> hitList = new ArrayList<Integer[]>();
+	
+	/**
+	 * 
+	 * @param cat1
+	 * @param cat2
+	 * @param elementNumber
+	 */
 	
 	public SubBoard(Category cat1, Category cat2, int elementNumber) {
 		this.cat1 = cat1;
@@ -22,13 +38,31 @@ public class SubBoard {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	
 	public Category getCategory1() {
 		return cat1;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	
 	public Category getCategory2() {
 		return cat2;
 	}
+	
+	/**
+	 * 
+	 * @param index1
+	 * @param index2
+	 * @param flipAxes
+	 * @return
+	 */
 	
 	public int getIndex(int index1, int index2, boolean flipAxes) {
 		int x,y;
@@ -43,10 +77,24 @@ public class SubBoard {
 		return board[x][y];
 	}
 	
-	public ArrayList<Integer[]> getLinkList() {
-		return linkList;
+	/**
+	 * 
+	 * @return
+	 */
+	
+	public ArrayList<Integer[]> getHitList() {
+		return hitList;
 	}
 
+	/**
+	 * updates value at specific index
+	 * 
+	 * @param index1
+	 * @param index2
+	 * @param status
+	 * @param flipAxes
+	 * @throws SolvingException
+	 */
 	public void update(int index1, int index2, int status, boolean flipAxes) throws SolvingException {
 		int x,y;
 		if (flipAxes) {
@@ -73,6 +121,14 @@ public class SubBoard {
 		}
 		board[x][y] = status;
 	}
+	
+	/**
+	 * takes the most recent hits not yet expanded and turns everything else in 
+	 * their rows and columns into misses, removes hits from hitQueue
+	 * 
+	 * @return
+	 * @throws SolvingException
+	 */
 
 	public boolean expandHits() throws SolvingException {
 		if (hitQueue.isEmpty())
@@ -90,12 +146,20 @@ public class SubBoard {
 					if (y != pair[1]) update(pair[0], y, -1, false);
 				}
 				
-				linkList.add(pair);
+				hitList.add(pair);
 			}
 			
 			return true;
 		}
 	}
+	
+	/**
+	 * parses through board and fills in holes (single non-decided spaces) in rows
+	 * and columns with hits, adds the hits to the hit queue
+	 * 
+	 * @return
+	 * @throws SolvingException
+	 */
 
 	public boolean inferHits() throws SolvingException {
 		boolean result = false;
