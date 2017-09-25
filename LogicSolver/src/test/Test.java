@@ -45,7 +45,18 @@ public class Test {
 		 */
 		int numberOfOptions = 7;
 		
-		String[] categories = {"weights 1 880 40","orders 1 1 1","nations 0", "competitors 0"};
+		String[] categories = {"A","B"};
+		
+		String[][] options = {
+				{"a"},
+				{"b"}
+				};
+		
+		String[] rules = {
+				"0 A B a b 1"
+				};
+		
+		/*String[] categories = {"weights 1 880 40","orders 1 1 1","nations 0", "competitors 0"};
 		
 		String[][] options = {
 				{"880","920","960","1000","1040","1080","1120"},
@@ -88,7 +99,7 @@ public class Test {
 				"0 competitors orders Nicola 7 -1",
 				"2 weights orders orders 6 1 160",
 				"0 orders nations 7 SA -1"
-				};
+				};*/
 		
 		/* NO INPUT MODIFICATIONS AFTER THIS POINT*/
 	

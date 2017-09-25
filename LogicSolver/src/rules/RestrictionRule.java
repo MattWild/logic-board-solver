@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 import objects.Restriction;
 
@@ -45,7 +45,7 @@ public class RestrictionRule implements Rule {
 	
 
 	@Override
-	public void applyTo(LogicPuzzle lp) throws SolvingException, SetupException {
+	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException {
 		int catRes = lp.getCategoryFromName(categoryToRestrict);
 		int optRes = lp.getOptionFromName(catRes, optionToRestrict);
 		

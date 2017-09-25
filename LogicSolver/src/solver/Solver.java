@@ -2,7 +2,7 @@ package solver;
 import java.util.ArrayList;
 
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 import objects.Relation;
 import rules.RuleManager;
@@ -56,7 +56,7 @@ public class Solver {
 	public void solve() {
 		try {
 			rm.applyRulesTo(lp);
-		} catch (SolvingException e) {
+		} catch (LogicException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SetupException e) {

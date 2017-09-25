@@ -1,6 +1,6 @@
 package rules;
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 import objects.Relation;
 import objects.Restriction;
@@ -40,7 +40,7 @@ public class RelationRule implements Rule {
 	}
 
 	@Override
-	public void applyTo(LogicPuzzle lp) throws SolvingException, SetupException {
+	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException {
 		int main = lp.getCategoryFromName(mainCategory);
 		int cat1 = lp.getCategoryFromName(category1);
 		int cat2 = lp.getCategoryFromName(category2);

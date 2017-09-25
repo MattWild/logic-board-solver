@@ -1,6 +1,6 @@
 package rules;
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 
 /**
@@ -35,17 +35,23 @@ public class DeclarationRule implements Rule {
 	}
 
 	@Override
-	public void applyTo(LogicPuzzle lp) throws SolvingException, SetupException {
+	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException {
 		int cat1 = lp.getCategoryFromName(category1);
 		int cat2 = lp.getCategoryFromName(category2);
 		int opt1 = lp.getOptionFromName(cat1, option1);
 		int opt2 = lp.getOptionFromName(cat2, option2);
 		
-		if (value == -1) {
-			lp.getOption(cat1, opt1).declareMiss(cat2, opt2);
-			lp.getOption(cat2, opt2).declareMiss(cat1, opt1);
-		} else {
-			lp.getOption(cat1, opt1).declareLink(cat2, opt2);
+		
+		try {
+			if (value == -1) {
+				lp.getOption(cat1, opt1).declareMiss(cat2, opt2);
+				lp.getOption(cat2, opt2).declareMiss(cat1, opt1);
+			} else {
+				lp.getOption(cat1, opt1).declareLink(cat2, opt2);
+			}
+		} catch (LogicException e) {
+			e.addOption(cat2, opt2);
+			throw e;
 		}
 	}
 

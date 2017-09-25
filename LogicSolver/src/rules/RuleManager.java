@@ -2,7 +2,7 @@ package rules;
 import java.util.ArrayList;
 
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 
 /**
@@ -53,11 +53,11 @@ public class RuleManager {
 	/**
 	 * 
 	 * @param lb
-	 * @throws SolvingException
+	 * @throws LogicException
 	 * @throws SetupException
 	 */
 
-	public void applyRulesTo(LogicPuzzle lp) throws SolvingException, SetupException {
+	public void applyRulesTo(LogicPuzzle lp) throws LogicException, SetupException {
 		for (Rule r : rules)
 			r.applyTo(lp);
 	}

@@ -1,6 +1,6 @@
 package rules;
 import exceptions.SetupException;
-import exceptions.SolvingException;
+import exceptions.LogicException;
 import objects.LogicPuzzle;
 
 /**
@@ -17,9 +17,9 @@ public interface Rule {
 	 * applies rule to a logic board for setup of logic puzzle
 	 * 
 	 * @param lb
-	 * @throws SolvingException
+	 * @throws LogicException
 	 * @throws SetupException
 	 */
-	public void applyTo(LogicPuzzle lp) throws SolvingException, SetupException;
+	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException;
 	
 }
