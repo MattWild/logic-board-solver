@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 import exceptions.SetupException;
 import exceptions.SolvingException;
-import objects.LogicBoard;
+import objects.LogicPuzzle;
 
 /**
  * This class parses a list of rules as strings and stores them
@@ -35,7 +35,7 @@ public class RuleManager {
 		
 		switch(type) {
 		case 0:
-			rule = new DelarationRule(ruleString.substring(2));
+			rule = new DeclarationRule(ruleString.substring(2));
 			break;
 			
 		case 1:
@@ -57,8 +57,8 @@ public class RuleManager {
 	 * @throws SetupException
 	 */
 
-	public void applyRulesTo(LogicBoard lb) throws SolvingException, SetupException {
+	public void applyRulesTo(LogicPuzzle lp) throws SolvingException, SetupException {
 		for (Rule r : rules)
-			r.applyTo(lb);
+			r.applyTo(lp);
 	}
 }

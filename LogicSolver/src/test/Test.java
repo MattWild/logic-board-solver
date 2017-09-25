@@ -1,5 +1,5 @@
 package test;
-import objects.LogicBoard;
+import objects.LogicPuzzle;
 import rules.RuleManager;
 import solver.Solver;
 
@@ -45,7 +45,7 @@ public class Test {
 		 */
 		int numberOfOptions = 7;
 		
-		String[] categories = {"weights 1","orders 1","nations 0", "competitors 0"};
+		String[] categories = {"weights 1 880 40","orders 1 1 1","nations 0", "competitors 0"};
 		
 		String[][] options = {
 				{"880","920","960","1000","1040","1080","1120"},
@@ -58,15 +58,12 @@ public class Test {
 				"2 weights orders orders 6 4 80",
 				"0 competitors nations Jeremy Kor -1",
 				"0 orders nations 7 Kor -1",
-				"1 nations competitors Sw Fran",
-				"1 nations orders Sw 6",
+				"1 nations SW competitors Fran orders 6",
 				"0 competitors orders Fran 6 -1",
 				"2 weights nations competitors SA Wen 0",
 				"0 nations competitors SA Wen -1",
-				"1 weights competitors 920 Brent",
-				"1 weights orders 920 2",
-				"1 nations competitors Can Brent",
-				"1 nations orders Can 2",
+				"1 weights 920 competitors Brent orders 2",
+				"1 nations Can competitors Brent orders 2",
 				"0 competitors orders Brent 2 -1",
 				"0 weights nations 920 Can -1",
 				"0 weights orders 960 4 1",
@@ -95,11 +92,10 @@ public class Test {
 		
 		/* NO INPUT MODIFICATIONS AFTER THIS POINT*/
 	
-		LogicBoard lb = new LogicBoard(numberOfOptions, categories, options);
+		LogicPuzzle lp = new LogicPuzzle(categories, options);
 		RuleManager rm = new RuleManager(rules);
-		Solver solver = new Solver(lb, rm);
+		Solver solver = new Solver(lp, rm);
 		
-		solver.initialize();
 		solver.solve();
 		
 	}

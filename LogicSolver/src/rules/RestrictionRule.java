@@ -1,8 +1,12 @@
 package rules;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import exceptions.SetupException;
 import exceptions.SolvingException;
-import objects.Category;
-import objects.LogicBoard;
+import objects.LogicPuzzle;
+import objects.Restriction;
 
 /**
  * This class defines a restriction rule, one that limits the 
@@ -16,9 +20,9 @@ import objects.LogicBoard;
 public class RestrictionRule implements Rule {
 	
 	String categoryToRestrict;
-	String targetCategory;
+	ArrayList<String> targetCategories;
 	String optionToRestrict;
-	String targetOption;
+	ArrayList<String> targetOptions;
 
 	/**
 	 * 
@@ -26,30 +30,36 @@ public class RestrictionRule implements Rule {
 	 */
 	
 	public RestrictionRule(String string) {
+		targetCategories = new ArrayList<String>();
+		targetOptions = new ArrayList<String>();
+		
 		String[] x = string.split(" ");
 		
 		categoryToRestrict = x[0];
-		targetCategory = x[1];
-		optionToRestrict = x[2];
-		targetOption = x[3];
+		optionToRestrict = x[1];
+		for(int i = 2; i < x.length; i++) {
+			targetCategories.add(x[i]);
+			targetOptions.add(x[i+1]);
+		}
 	}
 	
 
 	@Override
-	public void applyTo(LogicBoard lb) throws SolvingException, SetupException {
-		Category catRes = lb.getCategory(categoryToRestrict);
-		Category catTar = lb.getCategory(targetCategory);
-
-		try {
-			int optResIndex = catRes.getOptionIndex(optionToRestrict);
-			int optTarIndex = catTar.getOptionIndex(targetOption);
+	public void applyTo(LogicPuzzle lp) throws SolvingException, SetupException {
+		int catRes = lp.getCategoryFromName(categoryToRestrict);
+		int optRes = lp.getOptionFromName(catRes, optionToRestrict);
 		
-			catRes.addRestriction(optResIndex, catTar, optTarIndex);
-		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(-1);
+		Set<int[]> restrictedOptions = new HashSet<int[]>();
+		
+		for (int i = 0; i < targetCategories.size(); i++) {
+			int tarCat = lp.getCategoryFromName(targetCategories.get(i));
+			int tarOpt = lp.getOptionFromName(tarCat, targetOptions.get(i));
+			
+			restrictedOptions.add(new int[]{tarCat, tarOpt});
 		}
-}
+		
+		Restriction r = new Restriction(restrictedOptions);
+		lp.getOption(catRes, optRes).addRestriction(r);
+	}
 
 }

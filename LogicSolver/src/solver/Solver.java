@@ -3,12 +3,8 @@ import java.util.ArrayList;
 
 import exceptions.SetupException;
 import exceptions.SolvingException;
-import objects.Category;
-import objects.CategoryOptionPair;
-import objects.LogicBoard;
-import objects.NumericCategory;
+import objects.LogicPuzzle;
 import objects.Relation;
-import objects.SubBoard;
 import rules.RuleManager;
 
 /**
@@ -20,7 +16,7 @@ import rules.RuleManager;
  */
 
 public class Solver {
-	LogicBoard lb;
+	LogicPuzzle lp;
 	RuleManager rm;
 	
 	/**
@@ -29,8 +25,8 @@ public class Solver {
 	 * @param rm
 	 */
 	
-	public Solver(LogicBoard lb, RuleManager rm) {
-		this.lb = lb;
+	public Solver(LogicPuzzle lp, RuleManager rm) {
+		this.lp = lp;
 		this.rm = rm;
 	}
 	
@@ -38,10 +34,9 @@ public class Solver {
 	 * fully sets up logic board and applies the initial rules
 	 */
 	
-	public void initialize() {
+	/*public void initialize() {
 		try {
-			lb.initialize();
-			rm.applyRulesTo(lb);
+
 		} catch (SetupException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -51,9 +46,7 @@ public class Solver {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
-		lb.printFull();
-	}
+	}*/
 	
 	/**
 	 * iteratively applies different solving procedures until no new
@@ -61,7 +54,17 @@ public class Solver {
 	 */
 	
 	public void solve() {
-		boolean notFinished = true;
+		try {
+			rm.applyRulesTo(lp);
+		} catch (SolvingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SetupException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		/*boolean notFinished = true;
 			while(notFinished) {
 				notFinished = false;
 				if(hitExpansion()) {
@@ -81,7 +84,7 @@ public class Solver {
 				
 				if(relationTrigger())
 					notFinished = true;
-			}
+			}*/
 	}
 	
 	/**
@@ -89,7 +92,7 @@ public class Solver {
 	 * be performed
 	 * 
 	 * @return	true if an update was performed
-	 */
+	 *
 	
 	private boolean relationTrigger() {
 		boolean result = false;
@@ -121,7 +124,7 @@ public class Solver {
 	 * @param numericC	category using relation
 	 * @param r			relation to be enforced
 	 * @return	true if update was performed
-	 */
+	 *
 	
 	private boolean enforceRelation(NumericCategory numericC, Relation r) {
 		boolean result = false;
@@ -196,7 +199,7 @@ public class Solver {
 			 * 		assumes options are ordered in terms of magnitude
 			 * 		opt1 cannot have a greater value than opt2's max
 			 * 		opt2 cannot have a lesser value than opt1's max
-			 */
+			 *
 		
 			int i = lb.getElementNumber() - 1;
 			while ((val1 = retrievePosition(subBoard1, i, r.getCatOptPair1().getOptionIndex(), flipAxes1)) == -1) {
@@ -228,7 +231,7 @@ public class Solver {
 	 * be performed
 	 * 
 	 * @return	true if an update was performed
-	 */
+	 *
 	
 	private boolean linkTrigger() {
 		boolean result = false;
@@ -256,7 +259,7 @@ public class Solver {
 	 * @param index1	index of option in the first category
 	 * @param index2	index of option in the second category
 	 * @return	true if update was performed
-	 */
+	 *
 	
 	private boolean enforceLink(Category cat1, Category cat2, int index1, int index2) {
 		boolean result = false;
@@ -302,7 +305,7 @@ public class Solver {
 	 * by process of elimination
 	 * 
 	 * @return	true if update was performed
-	 */
+	 *
 	
 	private boolean hitExpansion(){
 		boolean result = false;
@@ -335,7 +338,7 @@ public class Solver {
 	 * checks if any restriction indicates that an update should be performed
 	 * 
 	 * @return	true if an update was performed
-	 */
+	 *
 	
 	private boolean restrictionTrigger() {
 		boolean result = false;
@@ -363,7 +366,7 @@ public class Solver {
 	 * @param optIndex		index of option with restrictions
 	 * @param restrictions	list of restrictions
 	 * @return  true if update was performed
-	 */
+	 *
 	
 	private boolean enforceRestriction(Category c, int optIndex, ArrayList<CategoryOptionPair> restrictions) {
 		boolean result = false;
@@ -405,7 +408,7 @@ public class Solver {
 	 * @param c				
 	 * @param i
 	 * @param restrictions
-	 */
+	 *
 	
 	private void eliminateLeftoverRestrictions(Category c, int i, ArrayList<CategoryOptionPair> restrictions) {
 		for (CategoryOptionPair catOptPair : restrictions) {
@@ -429,7 +432,7 @@ public class Solver {
 	 * @param index2
 	 * @param status
 	 * @param flipAxes
-	 */
+	 *
 
 	private void updatePosition(SubBoard board, int index1, int index2, int status, boolean flipAxes) {
 		try {
@@ -448,9 +451,10 @@ public class Solver {
 	 * @param index2
 	 * @param flipAxes
 	 * @return
-	 */
+	 *
 	
 	private int retrievePosition(SubBoard board, int index1, int index2, boolean flipAxes) {
 		return board.getIndex(index1, index2, flipAxes);
 	}
+	*/
 }
