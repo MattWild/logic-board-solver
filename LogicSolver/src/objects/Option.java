@@ -38,7 +38,7 @@ public class Option {
 				for (int j = 0; j < optionNum; j++)
 					categoryPossibilities.add(j);
 			
-				possibleLinks.put(categoryInd, categoryPossibilities);
+				possibleLinks.put(i, categoryPossibilities);
 				links[i] = -1;
 			}
 		}
@@ -107,28 +107,29 @@ public class Option {
 	
 	public Map<Integer, Set<Relation>> getRelations(boolean isGreater) {
 		if (isGreater) 
-			return relations.get(1);
+			return relations.get(0);
 		else
-			return relations.get(2);
+			return relations.get(1);
 	}
 	
-	public void inferLinks() throws SetupException {
-		Set<Integer> possibilities;
-		
+	public void inferLinks() throws SetupException, LogicException {
 		for (int i = 0; i < possibleLinks.size(); i++) {
-			possibilities = possibleLinks.get(i);	
-			Iterator<Integer> iterator = possibilities.iterator();
-
-			if (iterator.hasNext()) {
-				int link = iterator.next();
-				if (!iterator.hasNext()) {
-					absorbOption(i, link);
-				}
+			if (links[i] == -1) {
+				System.out.println(i + " !");
+				Iterator<Integer> iterator = possibleLinks.get(i).iterator();
+				System.out.println(possibleLinks.get(i));
+				if (iterator.hasNext()) {
+					int link = iterator.next();
+					System.out.println(link + " ?");
+					if (!iterator.hasNext()) {
+						absorbOption(i, link);
+					}
+				} 
 			}
 		}
 	}
 	
-	private void absorbOption(int i, int link) throws SetupException {
+	private void absorbOption(int i, int link) throws SetupException, LogicException {
 		Option toAbsorb = lp.getOption(i, link);
 		
 		links[i] = link;
@@ -139,6 +140,24 @@ public class Option {
 		
 		addRelations(toAbsorb);
 		
+		for(int cat = 0; cat < links.length; cat++) {
+			if (links[cat] != -1) 
+				if (cat == i) {
+					for (int opt = 0; opt < lp.getOptionNum(); opt++) {
+						if (opt != links[cat]) {
+							for(int altCat = 0; altCat < links.length; altCat++) {
+								if (links[altCat] != -1 && altCat != cat) {
+									lp.getOption(cat, opt).declareMiss(altCat, links[altCat]);
+								}
+							}
+						}
+					}
+				} else {
+					for (int opt = 0; opt < lp.getOptionNum(); opt++) 
+						if (opt != links[cat])
+							lp.getOption(cat, opt).declareMiss(i, link);
+				}
+		}
 		
 		condense(new Option[]{toAbsorb});
 		
@@ -148,15 +167,21 @@ public class Option {
 
 	private void addRelations(Option option) {
 		for(int categoryIndex : option.getRelations(false).keySet()) {
+			System.out.println("Hey " + categoryIndex);
+			if (relations.get(0).get(categoryIndex) == null) 
+				relations.get(0).put(categoryIndex, new HashSet<Relation>());
 			relations.get(0).get(categoryIndex).addAll(option.getRelations(false).get(categoryIndex));
 		}
 		
 		for(int categoryIndex : option.getRelations(true).keySet()) {
+			System.out.println("Hola");
+			if (relations.get(1).get(categoryIndex) == null) 
+				relations.get(1).put(categoryIndex, new HashSet<Relation>());
 			relations.get(1).get(categoryIndex).addAll(option.getRelations(true).get(categoryIndex));
 		}
 	}
 
-	public void condenseByFilter(int filterAmount) throws SetupException {
+	public void condenseByFilter(int filterAmount) throws SetupException, LogicException {
 		Set<Integer> possibilities;
 		
 		for(int i = 0; i < possibleLinks.size(); i++) {
@@ -177,7 +202,7 @@ public class Option {
 		}
 	}
 
-	private void condense(Option[] condensers) throws SetupException {
+	private void condense(Option[] condensers) throws SetupException, LogicException {
 		Set<Integer> newPossibilities;
 		
 		for (int i : possibleLinks.keySet()) {
@@ -203,7 +228,7 @@ public class Option {
 		}
 	}
 
-	private void pushRelationsExclude(int mainCategoryIndex, Set<Integer> difference) throws SetupException {
+	private void pushRelationsExclude(int mainCategoryIndex, Set<Integer> difference) throws SetupException, LogicException {
 		boolean isLesser;
 		Iterator<Relation> iterator;
 		Relation r;
@@ -214,6 +239,7 @@ public class Option {
 			iterator = relations.get(x).get(mainCategoryIndex).iterator();
 			
 			while(iterator.hasNext()) {
+				
 				r = iterator.next();
 				Option otherOption = lp.getOption(r.getCategoryIndex(isLesser), r.getOptionIndex(isLesser));
 				
@@ -274,7 +300,7 @@ public class Option {
 		}
 	}
 	
-	private void pushRelationsInclude(int mainCategoryIndex, int link) throws SetupException {
+	private void pushRelationsInclude(int mainCategoryIndex, int link) throws SetupException, LogicException {
 		boolean isLesser;
 		Iterator<Relation> iterator;
 		Relation r;
@@ -282,11 +308,15 @@ public class Option {
 		for (int x : new int[]{0,1}) {
 			isLesser = false;
 			if (x == 0) isLesser = true;
+			
+			if(relations.get(x).get(mainCategoryIndex) == null) continue;
 			iterator = relations.get(x).get(mainCategoryIndex).iterator();
 			
 			while(iterator.hasNext()) {
 				r = iterator.next();
-				Option otherOption = lp.getOption(r.getCategoryIndex(isLesser), r.getOptionIndex(isLesser));
+				Option otherOption = lp.getOption(r.getCategoryIndex(!isLesser), r.getOptionIndex(!isLesser));
+				
+				System.out.println(r.getCategoryIndex(!isLesser) + " " + r.getOptionIndex(!isLesser));
 				
 				if (r.isGreaterLessThan()) {
 					if (isLesser) {
@@ -301,6 +331,7 @@ public class Option {
 						
 						if (!excludedPossibilities.isEmpty()) {
 							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
+							otherOption.inferLinks();
 							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
 						}
 					} else {
@@ -311,13 +342,16 @@ public class Option {
 							excludedPossibilities.add(max);
 							max--;
 						}
-						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
 						
+						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
+					
 						if (!excludedPossibilities.isEmpty()) {
 							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
+							otherOption.inferLinks();
 							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
 						}
 						break;
+						
 					}
 					
 				} else {
@@ -334,13 +368,13 @@ public class Option {
 		return links[i] != -1;
 	}
 
-	private void checkRestrictions(int i, Set<Integer> difference) throws SetupException {
+	private void checkRestrictions(int i, Set<Integer> difference) throws SetupException, LogicException {
 		for(int j : difference) {
 			checkRestrictions(i, j, false);
 		}
 	}
 	
-	private void checkAllRestrictions() throws SetupException {
+	public void checkAllRestrictions() throws SetupException, LogicException {
 		Iterator<Restriction> iteratorR = restrictions.iterator();
 		Iterator<int[]>	iteratorI;
 		int[] indices;
@@ -384,7 +418,7 @@ public class Option {
 		}
 	}
 	
-	private void checkRestrictions(int i, int j, boolean isLink) throws SetupException {		
+	private void checkRestrictions(int i, int j, boolean isLink) throws SetupException, LogicException {		
 		Iterator<Restriction> iterator = restrictions.iterator();
 
 		Restriction r = null;
@@ -409,7 +443,7 @@ public class Option {
 		}
 	}
 
-	private void removeOption(int categoryIndex, int optionIndex) throws SetupException {
+	private void removeOption(int categoryIndex, int optionIndex) throws SetupException, LogicException {
 		possibleLinks.get(categoryIndex).remove(optionIndex);
 		checkRestrictions(categoryIndex, optionIndex, false);
 	}

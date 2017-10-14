@@ -47,10 +47,11 @@ public class DeclarationRule implements Rule {
 				lp.getOption(cat1, opt1).declareMiss(cat2, opt2);
 				lp.getOption(cat2, opt2).declareMiss(cat1, opt1);
 			} else {
+				System.out.println(cat1 + " " + opt1 + " " + cat2 + " " + opt2);
 				lp.getOption(cat1, opt1).declareLink(cat2, opt2);
 			}
 		} catch (LogicException e) {
-			e.addOption(cat2, opt2);
+			e.addOption(cat1, opt1);
 			throw e;
 		}
 	}

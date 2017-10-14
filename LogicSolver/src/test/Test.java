@@ -45,15 +45,19 @@ public class Test {
 		 */
 		int numberOfOptions = 7;
 		
-		String[] categories = {"A","B"};
+		String[] categories = {"A","B", "C", "D 1 1"};
 		
 		String[][] options = {
-				{"a"},
-				{"b"}
+				{"a", "b", "c", "A"},
+				{"d", "e", "f", "B"},
+				{"g", "h", "i", "C"},
+				{"1", "2", "3", "4"}
 				};
 		
 		String[] rules = {
-				"0 A B a b 1"
+				"2 D A C b i 1",
+				"0 A D b 2 1",
+				"0 B C f g -1"
 				};
 		
 		/*String[] categories = {"weights 1 880 40","orders 1 1 1","nations 0", "competitors 0"};
@@ -108,6 +112,8 @@ public class Test {
 		Solver solver = new Solver(lp, rm);
 		
 		solver.solve();
+		
+		lp.printBoard();
 		
 	}
 }

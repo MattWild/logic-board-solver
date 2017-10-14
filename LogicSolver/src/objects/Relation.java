@@ -18,11 +18,14 @@ public class Relation {
 
 	
 	public Relation(int mainCategoryIndex, int category1Index, int option1Index, int category2Index, int option2Index, int difference, boolean isGreaterLessThan) {
+		this.categoryIndices = new int[2];
+		this.optionIndices = new int[2];
+		
 		this.mainCategoryIndex = mainCategoryIndex;
 		this.categoryIndices[0] = category1Index;
 		this.optionIndices[0] = option1Index;
-		this.categoryIndices[1] = category1Index;
-		this.optionIndices[1] = option1Index;
+		this.categoryIndices[1] = category2Index;
+		this.optionIndices[1] = option2Index;
 		this.difference = difference;
 		this.isGreaterLessThan = isGreaterLessThan;
 	}

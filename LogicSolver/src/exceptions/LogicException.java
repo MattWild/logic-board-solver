@@ -39,4 +39,25 @@ public class LogicException extends Exception {
     {
       super( cause );
     }
+
+	public int getType() {
+		return type;
+	}
+
+	public int getCategory1Index() {
+		return category1Index;
+	}
+
+	public int getOption1Index() {
+		return option1Index;
+	}
+
+	public int getCategory2Index() {
+		return category2Index;
+	}
+
+	public int getOption2Index() {
+		return option2Index;
+	}
+
 }

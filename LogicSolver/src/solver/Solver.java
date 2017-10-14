@@ -1,9 +1,12 @@
 package solver;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import exceptions.SetupException;
 import exceptions.LogicException;
 import objects.LogicPuzzle;
+import objects.Option;
 import objects.Relation;
 import rules.RuleManager;
 
@@ -18,6 +21,7 @@ import rules.RuleManager;
 public class Solver {
 	LogicPuzzle lp;
 	RuleManager rm;
+	Set<Option> optionTracker;
 	
 	/**
 	 * 
@@ -28,6 +32,7 @@ public class Solver {
 	public Solver(LogicPuzzle lp, RuleManager rm) {
 		this.lp = lp;
 		this.rm = rm;
+		optionTracker = new HashSet<Option>();
 	}
 	
 	/**
@@ -58,11 +63,36 @@ public class Solver {
 			rm.applyRulesTo(lp);
 		} catch (LogicException e) {
 			// TODO Auto-generated catch block
+			System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());
 			e.printStackTrace();
+			System.exit(-1);
 		} catch (SetupException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(-1);
 		}
+		
+		for(int cat = 0; cat < lp.getCategoryNum(); cat++) {
+			for(int opt = 0; opt < lp.getOptionNum(); opt++){
+				try {
+					Option option = lp.getOption(cat, opt);
+					if (!optionTracker.contains(option)) {
+						option.checkAllRestrictions();
+						optionTracker.add(option);
+					}
+				} catch (SetupException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.exit(-1);
+				} catch (LogicException e) {
+					// TODO Auto-generated catch block
+					System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}
+	}
 		
 		/*boolean notFinished = true;
 			while(notFinished) {
@@ -85,7 +115,6 @@ public class Solver {
 				if(relationTrigger())
 					notFinished = true;
 			}*/
-	}
 	
 	/**
 	 * checks if any numerical relation indicates that an update should

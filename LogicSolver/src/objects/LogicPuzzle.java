@@ -2,6 +2,7 @@ package objects;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import exceptions.SetupException;
 
@@ -122,6 +123,59 @@ public class LogicPuzzle {
 	}
 	
 	public void printBoard() {
+		String str = "";
 		
+		str += "+";
+		for(int i = 0; i < categoryNames.length - 1; i++) {
+			for (int j = 0; j < optionNum; j++) {
+				str += "-";
+			}
+			str += "+";
+		}
+		str += "\n";
+		
+		for (int cat1 = 0; cat1 < categoryNames.length - 1; cat1++) {
+			for (int opt1 = 0; opt1 < optionNum; opt1++) {				
+				Option option1 = options[cat1][opt1];
+				for(int cat2 = categoryNames.length - 1; cat2 > cat1; cat2--) {
+					str += "|";
+					if (option1.getLink(cat2) != -1) {
+						for (int opt2 = 0; opt2 < optionNum; opt2++) {
+							if (option1.getLink(cat2) == opt2) 
+								str += "O";
+							else
+								str += "X";
+						}
+					} else {
+						Set<Integer> possibilities = option1.getPossibilities(cat2);
+						
+						for (int opt2 = 0; opt2 < optionNum; opt2++) {
+							if (possibilities.contains(opt2)) 
+								str += " ";
+							else
+								str += "X";
+						}
+					}
+				}
+				
+				
+				str += "|\n";
+			}
+			
+			str += "+";
+			for(int i = 0; i < categoryNames.length - cat1 - 1; i++) {
+				for (int j = 0; j < optionNum; j++) {
+					str += "-";
+				}
+				str += "+";
+			}
+			str += "\n";
+		}
+		
+		System.out.println(str);
+	}
+
+	public int getCategoryNum() {
+		return categoryNames.length;
 	}
 }

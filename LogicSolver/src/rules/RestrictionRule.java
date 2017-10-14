@@ -3,8 +3,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import exceptions.SetupException;
 import exceptions.LogicException;
+import exceptions.SetupException;
 import objects.LogicPuzzle;
 import objects.Restriction;
 
@@ -37,7 +37,7 @@ public class RestrictionRule implements Rule {
 		
 		categoryToRestrict = x[0];
 		optionToRestrict = x[1];
-		for(int i = 2; i < x.length; i++) {
+		for(int i = 2; i + 1 < x.length; i += 2) {
 			targetCategories.add(x[i]);
 			targetOptions.add(x[i+1]);
 		}

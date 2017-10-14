@@ -1,9 +1,8 @@
 package rules;
-import exceptions.SetupException;
 import exceptions.LogicException;
+import exceptions.SetupException;
 import objects.LogicPuzzle;
 import objects.Relation;
-import objects.Restriction;
 
 /**
  * This class defines a relation rule, one that relates the values
@@ -54,6 +53,8 @@ public class RelationRule implements Rule {
 			lp.getOption(cat2, opt2).addRelation(r, true);
 		} else {
 			int[] param = lp.getCategoryParams(mainCategory);
+			
+			System.out.println(main + " " + cat1 + " " + opt1 + " " + cat2 + " " + opt2);
 			
 			Relation r = new Relation(main, cat1, opt1, cat2, opt2, (difference - param[0]) / param[1], true);
 			

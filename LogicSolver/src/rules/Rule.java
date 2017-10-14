@@ -1,6 +1,6 @@
 package rules;
-import exceptions.SetupException;
 import exceptions.LogicException;
+import exceptions.SetupException;
 import objects.LogicPuzzle;
 
 /**

@@ -1,8 +1,7 @@
 package rules;
 import java.util.ArrayList;
-
-import exceptions.SetupException;
 import exceptions.LogicException;
+import exceptions.SetupException;
 import objects.LogicPuzzle;
 
 /**
