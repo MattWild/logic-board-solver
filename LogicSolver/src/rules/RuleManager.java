@@ -57,7 +57,9 @@ public class RuleManager {
 	 */
 
 	public void applyRulesTo(LogicPuzzle lp) throws LogicException, SetupException {
-		for (Rule r : rules)
+		for (Rule r : rules) {
 			r.applyTo(lp);
+			lp.printBoard();
+		}
 	}
 }

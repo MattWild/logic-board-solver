@@ -113,18 +113,17 @@ public class Option {
 	}
 	
 	public void inferLinks() throws SetupException, LogicException {
-		for (int i = 0; i < possibleLinks.size(); i++) {
+		
+		for (int i = 0; i < links.length; i++) {
 			if (links[i] == -1) {
-				System.out.println(i + " !");
 				Iterator<Integer> iterator = possibleLinks.get(i).iterator();
-				System.out.println(possibleLinks.get(i));
 				if (iterator.hasNext()) {
 					int link = iterator.next();
-					System.out.println(link + " ?");
 					if (!iterator.hasNext()) {
 						absorbOption(i, link);
 					}
 				} 
+			} else {
 			}
 		}
 	}
@@ -160,8 +159,8 @@ public class Option {
 		}
 		
 		condense(new Option[]{toAbsorb});
-		
-		pushRelationsInclude(i, link);
+		pushRelationsExclude(i);
+
 		lp.setOption(i, link, this);
 	}
 
@@ -221,144 +220,92 @@ public class Option {
 				
 				possibleLinks.put(i, newPossibilities);
 				if(!difference.isEmpty()) {
+					lp.printBoard();
 					checkRestrictions(i, difference);
-					pushRelationsExclude(i, difference);
+					pushRelationsExclude(i);
 				}
 			}
 		}
 	}
 
-	private void pushRelationsExclude(int mainCategoryIndex, Set<Integer> difference) throws SetupException, LogicException {
-		boolean isLesser;
+	public void pushRelationsExclude(int mainCategoryIndex) throws SetupException, LogicException {
+		boolean otherIsLesser;
 		Iterator<Relation> iterator;
 		Relation r;
 		
 		for (int x : new int[]{0,1}) {
-			isLesser = false;
-			if (x == 0) isLesser = true;
-			iterator = relations.get(x).get(mainCategoryIndex).iterator();
-			
-			while(iterator.hasNext()) {
-				
-				r = iterator.next();
-				Option otherOption = lp.getOption(r.getCategoryIndex(isLesser), r.getOptionIndex(isLesser));
-				
-				if (r.isGreaterLessThan()) {
-					if (isLesser) {
-						int min = 0;
-						Set<Integer> excludedPossibilities = new HashSet<Integer>();
-						
-						while(!possibleLinks.get(mainCategoryIndex).contains(min)) {							
-							if (difference.contains(min)){
-								excludedPossibilities.add(min);
-							}
-							
-							min++;
-						}
-						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
-						
-						if (!excludedPossibilities.isEmpty()) {
-							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
-							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
-						}
-					} else {
-						int max = lp.getOptionNum() - 1;
-						Set<Integer> excludedPossibilities = new HashSet<Integer>();
-						
-						while(!possibleLinks.get(mainCategoryIndex).contains(max)) {							
-							if (difference.contains(max)){
-								excludedPossibilities.add(max);
-							}
-							
-							max--;
-						}
-						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
-						
-						if (!excludedPossibilities.isEmpty()) {
-							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
-							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
-						}
-					}
-					
-				} else {
-					Set<Integer> excludedPossibilities = new HashSet<Integer>();
-					for (int val : difference) {
-						int possVal;
-						if (isLesser)
-							possVal = val + r.getDifference();
-						else 
-							possVal = val - r.getDifference();
-						
-						if (possVal > 0 && possVal < lp.getOptionNum())
-							excludedPossibilities.add(possVal);
-					}
-					
-					otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
-					otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
-				}
-			}
-		}
-	}
-	
-	private void pushRelationsInclude(int mainCategoryIndex, int link) throws SetupException, LogicException {
-		boolean isLesser;
-		Iterator<Relation> iterator;
-		Relation r;
-		
-		for (int x : new int[]{0,1}) {
-			isLesser = false;
-			if (x == 0) isLesser = true;
-			
+			otherIsLesser = false;
+			if (x == 0) otherIsLesser = true;
 			if(relations.get(x).get(mainCategoryIndex) == null) continue;
 			iterator = relations.get(x).get(mainCategoryIndex).iterator();
 			
 			while(iterator.hasNext()) {
 				r = iterator.next();
-				Option otherOption = lp.getOption(r.getCategoryIndex(!isLesser), r.getOptionIndex(!isLesser));
 				
-				System.out.println(r.getCategoryIndex(!isLesser) + " " + r.getOptionIndex(!isLesser));
-				
-				if (r.isGreaterLessThan()) {
-					if (isLesser) {
-						int min = 0;
-						Set<Integer> excludedPossibilities = new HashSet<Integer>();
-						
-						while(min <= link) {
-							excludedPossibilities.add(min);
-							min++;
-						}
-						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
-						
-						if (!excludedPossibilities.isEmpty()) {
-							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
-							otherOption.inferLinks();
-							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
+				Option otherOption = lp.getOption(r.getCategoryIndex(!otherIsLesser), r.getOptionIndex(!otherIsLesser));
+				if (otherOption.getLink(mainCategoryIndex) == -1) {
+					if(links[mainCategoryIndex] != -1) relations.get(x).get(mainCategoryIndex).remove(r);
+					Set<Integer> includedPossibilities = new HashSet<Integer>();
+					if (r.isGreaterLessThan()) {
+						if (!otherIsLesser) {
+							int min = 0;
+							
+							if (links[mainCategoryIndex] == -1)
+								while(!possibleLinks.get(mainCategoryIndex).contains(min)) {							
+									min++;
+								}
+							else
+								min = links[mainCategoryIndex];
+							
+							for (int i = min+1; i < lp.getOptionNum(); i++) {
+								includedPossibilities.add(i);
+							}
+						} else {
+							int max = lp.getOptionNum() - 1;
+							
+							if (links[mainCategoryIndex] == -1)
+								while(!possibleLinks.get(mainCategoryIndex).contains(max)) {							
+									max--;
+								}
+							else 
+								max = links[mainCategoryIndex];
+	
+							for (int i = 0; i < max; i++) {
+								includedPossibilities.add(i);
+							}
 						}
 					} else {
-						int max = lp.getOptionNum() - 1;
-						Set<Integer> excludedPossibilities = new HashSet<Integer>();
 						
-						while(max >= link) {
-							excludedPossibilities.add(max);
-							max--;
+						if (links[mainCategoryIndex] == -1) {
+							for (int val : possibleLinks.get(mainCategoryIndex)) {
+								int possVal;
+								if (otherIsLesser)
+									possVal = val - r.getDifference();
+								else 
+									possVal = val + r.getDifference();
+								
+		
+								
+								if (possVal >= 0 && possVal < lp.getOptionNum()) {
+									includedPossibilities.add(possVal);
+								}
+							}
+						} else {
+							int possVal;
+							if (otherIsLesser)
+								possVal = links[mainCategoryIndex] - r.getDifference();
+							else 
+								possVal = links[mainCategoryIndex] + r.getDifference();
+							
+							includedPossibilities.add(possVal);
 						}
-						
-						excludedPossibilities.retainAll(otherOption.getPossibilities(mainCategoryIndex));
-					
-						if (!excludedPossibilities.isEmpty()) {
-							otherOption.getPossibilities(mainCategoryIndex).removeAll(excludedPossibilities);
-							otherOption.inferLinks();
-							otherOption.checkRestrictions(mainCategoryIndex, excludedPossibilities);
-						}
-						break;
-						
-					}
-					
+					}	
+					otherOption.getPossibilities(mainCategoryIndex).retainAll(includedPossibilities);
+					lp.printBoard();
+					otherOption.checkRestrictions(mainCategoryIndex, includedPossibilities);
+					otherOption.inferLinks();
 				} else {
-					if (isLesser)
-						otherOption.absorbOption(mainCategoryIndex, link + r.getDifference());
-					else 
-						otherOption.absorbOption(mainCategoryIndex, link - r.getDifference());
+					relations.get(x).get(mainCategoryIndex).remove(r);
 				}
 			}
 		}
@@ -446,5 +393,6 @@ public class Option {
 	private void removeOption(int categoryIndex, int optionIndex) throws SetupException, LogicException {
 		possibleLinks.get(categoryIndex).remove(optionIndex);
 		checkRestrictions(categoryIndex, optionIndex, false);
+		pushRelationsExclude(categoryIndex);
 	}
 }

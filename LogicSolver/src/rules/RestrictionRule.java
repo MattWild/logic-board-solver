@@ -1,11 +1,14 @@
 package rules;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import exceptions.LogicException;
 import exceptions.SetupException;
 import objects.LogicPuzzle;
+import objects.Option;
 import objects.Restriction;
 
 /**
@@ -56,6 +59,20 @@ public class RestrictionRule implements Rule {
 			int tarOpt = lp.getOptionFromName(tarCat, targetOptions.get(i));
 			
 			restrictedOptions.add(new int[]{tarCat, tarOpt});
+		}
+		
+		List<int[]> resOptList = new ArrayList<int[]>(restrictedOptions);
+		
+		for (int i = 0; i < resOptList.size(); i++) {
+			int[] catOptIndex = resOptList.get(i);
+			Option opt = lp.getOption(catOptIndex[0], catOptIndex[1]);
+			
+			for (int j = 0; j < resOptList.size(); j++) {
+				if (i != j) {
+					catOptIndex = resOptList.get(j);
+					opt.declareMiss(catOptIndex[0], catOptIndex[1]);
+				}
+			}
 		}
 		
 		Restriction r = new Restriction(restrictedOptions);

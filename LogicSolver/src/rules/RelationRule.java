@@ -2,6 +2,7 @@ package rules;
 import exceptions.LogicException;
 import exceptions.SetupException;
 import objects.LogicPuzzle;
+import objects.Option;
 import objects.Relation;
 
 /**
@@ -46,21 +47,25 @@ public class RelationRule implements Rule {
 		int opt1 = lp.getOptionFromName(cat1, option1);
 		int opt2 = lp.getOptionFromName(cat2, option2);
 		
+		Option option1 = lp.getOption(cat1, opt1);
+		Option option2 = lp.getOption(cat2, opt2);
+		
+		Relation r;
 		if (difference == 0) {
-			Relation r = new Relation(main, cat1, opt1, cat2, opt2, -1, true);
-			
-			lp.getOption(cat1, opt1).addRelation(r, false);
-			lp.getOption(cat2, opt2).addRelation(r, true);
+			r = new Relation(main, cat1, opt1, cat2, opt2, -1, true);
 		} else {
-			int[] param = lp.getCategoryParams(mainCategory);
-			
-			System.out.println(main + " " + cat1 + " " + opt1 + " " + cat2 + " " + opt2);
-			
-			Relation r = new Relation(main, cat1, opt1, cat2, opt2, (difference - param[0]) / param[1], true);
-			
-			lp.getOption(cat1, opt1).addRelation(r, false);
-			lp.getOption(cat2, opt2).addRelation(r, true);
+			int[] param = lp.getCategoryParams(mainCategory);	
+			r = new Relation(main, cat1, opt1, cat2, opt2, difference / param[1], false);
 		}
+		
+		option1.addRelation(r, false);
+		option2.addRelation(r, true);
+
+		option1.declareMiss(cat2, opt2);
+		option2.declareMiss(cat1, opt1);
+		
+		option1.pushRelationsExclude(main);
+		option2.pushRelationsExclude(main);
 	}
 
 }
