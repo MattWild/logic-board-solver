@@ -55,6 +55,7 @@ public class RelationRule implements Rule {
 			r = new Relation(main, cat1, opt1, cat2, opt2, -1, true);
 		} else {
 			int[] param = lp.getCategoryParams(mainCategory);	
+			System.out.println(difference / param[1]);
 			r = new Relation(main, cat1, opt1, cat2, opt2, difference / param[1], false);
 		}
 		
@@ -64,8 +65,8 @@ public class RelationRule implements Rule {
 		option1.declareMiss(cat2, opt2);
 		option2.declareMiss(cat1, opt1);
 		
-		option1.pushRelationsExclude(main);
-		option2.pushRelationsExclude(main);
+		option1.pushRelations(main);
+		option2.pushRelations(main);
 	}
 
 }

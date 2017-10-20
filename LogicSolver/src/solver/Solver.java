@@ -61,6 +61,13 @@ public class Solver {
 	public void solve() {
 		try {
 			rm.applyRulesTo(lp);
+			
+			
+			System.out.println("Extending Condensing");
+			checkCondensers();
+			checkRestrictions();
+			checkCondensers();
+			checkRestrictions();
 		} catch (LogicException e) {
 			// TODO Auto-generated catch block
 			System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());
@@ -71,26 +78,36 @@ public class Solver {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+
+	private void checkRestrictions() throws SetupException, LogicException {
+		Set<Option> checkedOptions = new HashSet<Option>();
 		
-		for(int cat = 0; cat < lp.getCategoryNum(); cat++) {
-			for(int opt = 0; opt < lp.getOptionNum(); opt++){
-				try {
-					Option option = lp.getOption(cat, opt);
-					if (!optionTracker.contains(option)) {
-						option.checkAllRestrictions();
-						optionTracker.add(option);
-					}
-				} catch (SetupException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					System.exit(-1);
-				} catch (LogicException e) {
-					// TODO Auto-generated catch block
-					System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());
-					e.printStackTrace();
-					System.exit(-1);
+		for (int cat = 0; cat < lp.getCategoryNum(); cat++)
+			for (int opt = 0; opt < lp.getOptionNum(); opt++) {
+				Option option = lp.getOption(cat, opt);
+				if (!checkedOptions.contains(option)) {
+					option.condenseByRestrictions();
+					checkedOptions.add(option);
 				}
 			}
+			
+	}
+
+	private void checkCondensers() throws SetupException, LogicException {
+		Set<Option> checkedOptions = new HashSet<Option>();
+		
+		for (int i = 1; i < lp.getOptionNum() - 1; i++) {
+			for (int cat = 0; cat < lp.getCategoryNum(); cat++)
+				for (int opt = 0; opt < lp.getOptionNum(); opt++) {
+					Option option = lp.getOption(cat, opt);
+					if (!checkedOptions.contains(option)) {
+						option.condenseByFilter(i);
+						checkedOptions.add(option);
+					}
+				}
+			
+			checkedOptions.clear();
 		}
 	}
 		

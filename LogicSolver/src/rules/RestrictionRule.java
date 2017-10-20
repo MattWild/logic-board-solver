@@ -44,6 +44,7 @@ public class RestrictionRule implements Rule {
 			targetCategories.add(x[i]);
 			targetOptions.add(x[i+1]);
 		}
+		
 	}
 	
 

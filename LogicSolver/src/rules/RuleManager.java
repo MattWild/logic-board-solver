@@ -44,11 +44,15 @@ public class RuleManager {
 		case 2:
 			rule = new RelationRule(ruleString.substring(2));
 			break;
+			
+		case 3:
+			rule = new DoubleRestrictionRule(ruleString.substring(2));
+			break;
 		}
 		
 		rules.add(rule);
 	}
-	
+
 	/**
 	 * 
 	 * @param lb

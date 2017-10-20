@@ -173,9 +173,102 @@ public class LogicPuzzle {
 		}
 		
 		System.out.println(str);
+		
+		
+		/*str = "Reversed\n";
+		
+		str += "+";
+		for(int i = 0; i < categoryNames.length - 1; i++) {
+			for (int j = 0; j < optionNum; j++) {
+				str += "-";
+			}
+			str += "+";
+		}
+		str += "\n";
+		
+		for (int cat1 = categoryNames.length - 1; cat1 > 0; cat1--) {
+			for (int opt1 = 0; opt1 < optionNum; opt1++) {				
+				Option option1 = options[cat1][opt1];
+				for(int cat2 = 0; cat2 < cat1; cat2++) {
+					str += "|";
+					if(cat1 == 0 && opt1 == 2 && cat2 == 1) System.out.println(option1);
+					if (option1.getLink(cat2) != -1) {
+						for (int opt2 = 0; opt2 < optionNum; opt2++) {
+							if (option1.getLink(cat2) == opt2) 
+								str += "O";
+							else
+								str += "X";
+						}
+					} else {
+						Set<Integer> possibilities = option1.getPossibilities(cat2);
+						
+						for (int opt2 = 0; opt2 < optionNum; opt2++) {
+							if (possibilities.contains(opt2)) 
+								str += " ";
+							else
+								str += "X";
+						}
+					}
+				}
+				
+				
+				str += "|\n";
+			}
+			
+			str += "+";
+			for(int i = 0; i < cat1; i++) {
+				for (int j = 0; j < optionNum; j++) {
+					str += "-";
+				}
+				str += "+";
+			}
+			str += "\n";
+		}
+			
+		System.out.println(str);
+		
+		/*try {
+			validate();
+		} catch (SetupException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 
 	public int getCategoryNum() {
 		return categoryNames.length;
+	}
+	
+	public void validate() throws SetupException {
+		for(Option[] cat1 : options) {
+			for(Option opt1 : cat1) {
+				for (int i = 0; i < options.length; i++) {
+					if (opt1.getLink(i) == -1) {
+						Set<Integer> possibilities = opt1.getPossibilities(i);
+						
+						for (int j = 0; j < cat1.length; j++) {
+							if (possibilities.contains(j))
+								for (int cat2 = 0; cat2 < options.length; cat2++) {
+									if (opt1.getLink(cat2) != -1)
+										if (!getOption(i,j).getPossibilities(cat2).contains(opt1.getLink(cat2))) {
+											throw new SetupException("Possibility mismatch " + cat2 + " " + opt1.getLink(cat2) + " " + i + " " + j);
+										}
+								}
+							else 
+								for (int cat2 = 0; cat2 < options.length; cat2++) {
+									if (opt1.getLink(cat2) != -1)
+										if (getOption(i,j).getPossibilities(cat2) != null && getOption(i,j).getPossibilities(cat2).contains(opt1.getLink(cat2))) {
+											throw new SetupException("Possibility mismatch " + cat2 + " " + opt1.getLink(cat2) + " " + i + " " + j);
+										}
+								}
+						}
+					} else {
+						if (getOption(i, opt1.getLink(i)) != opt1) {
+							throw new SetupException("Link not established " + i + " " + opt1.getLink(i));
+						}
+					}
+				}
+			}
+		}
 	}
 }

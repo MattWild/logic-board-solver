@@ -7,10 +7,12 @@ public class Restriction {
 	
 	private Set<int[]> restrictedOptions;
 	private boolean isLocked;
+	private boolean active;
 	
 	public Restriction(Set<int[]> restrictedOptions) {
 		this.restrictedOptions = restrictedOptions;
 		this.isLocked = false;
+		this.active = true;
 	}
 	
 	public boolean handle(int i, int j, boolean isLink) {
@@ -20,7 +22,7 @@ public class Restriction {
 		
 		while(iterator.hasNext()) {
 			int[] indices = iterator.next();
-			
+
 			if (indices[0] == i && indices[1] == j) {
 				restrictedOptions.remove(indices);
 				
@@ -50,5 +52,13 @@ public class Restriction {
 	
 	private boolean isEnforceable() {
 		return restrictedOptions.size() == 1;
+	}
+	
+	public void setInactive() {
+		active = false;
+	}
+	
+	public boolean isActive() {
+		return active;
 	}
 }

@@ -7,8 +7,8 @@ public class LogicException extends Exception {
 	private int type;
 	private int category1Index;
 	private int option1Index;
-	private int category2Index;
-	private int option2Index;
+	private int category2Index = -1;
+	private int option2Index = -1;
 
     /**
      * Create a new LogicException object.

@@ -15,11 +15,13 @@ public class Relation {
 	private int[] optionIndices;
 	private boolean isGreaterLessThan;
 	private int difference;
+	private boolean[] active;
 
 	
 	public Relation(int mainCategoryIndex, int category1Index, int option1Index, int category2Index, int option2Index, int difference, boolean isGreaterLessThan) {
 		this.categoryIndices = new int[2];
 		this.optionIndices = new int[2];
+		this.active = new boolean[2];
 		
 		this.mainCategoryIndex = mainCategoryIndex;
 		this.categoryIndices[0] = category1Index;
@@ -28,6 +30,8 @@ public class Relation {
 		this.optionIndices[1] = option2Index;
 		this.difference = difference;
 		this.isGreaterLessThan = isGreaterLessThan;
+		this.active[0] = true;
+		this.active[1] = true;
 	}
 	
 	public int getMainCategoryIndex() {
@@ -54,5 +58,13 @@ public class Relation {
 	
 	public int getDifference() {
 		return difference;
+	}
+	
+	public boolean isActive(int x) {
+		return active[x];
+	}
+	
+	public void markInactive(int x) {
+		active[x] = false;
 	}
 }
