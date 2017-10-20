@@ -1,11 +1,8 @@
 package test;
-import objects.LogicPuzzle;
-import rules.RuleManager;
-import solver.Solver;
 
 public class FullTest {
 	public static void main(String[] args) {
-		Test test1 = new BasicMissTest();
+		/*Test test1 = new BasicMissTest();
 		Test test2 = new BasicHitTest();
 		Test test3 = new BasicRestrictionTest();
 		Test test4 = new BasicRelationGreaterLesserTest();
@@ -47,7 +44,7 @@ public class FullTest {
 		test11.run();
 		test12.run();
 		
-		System.out.println("III. Relation Trigger Tests\n\n");
+		System.out.println("IV. Relation Trigger Tests\n\n");
 		
 		test13.run();
 		test14.run();
@@ -56,6 +53,9 @@ public class FullTest {
 		test17.run();
 		test18.run();
 		test19.run();
-		test20.run();
+		test20.run();*/
+		
+		Test test = new PuzzleTest();
+		test.run();
 	}
 }
