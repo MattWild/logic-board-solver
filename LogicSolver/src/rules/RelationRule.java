@@ -59,14 +59,11 @@ public class RelationRule implements Rule {
 			r = new Relation(main, cat1, opt1, cat2, opt2, difference / param[1], false);
 		}
 		
-		option1.addRelation(r, false);
-		option2.addRelation(r, true);
-
 		option1.declareMiss(cat2, opt2);
 		option2.declareMiss(cat1, opt1);
 		
-		option1.pushRelations(main);
-		option2.pushRelations(main);
+		option1.addRelation(r, false);
+		option2.addRelation(r, true);
 	}
 
 }

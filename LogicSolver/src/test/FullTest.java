@@ -55,7 +55,7 @@ public class FullTest {
 		test19.run();
 		test20.run();*/
 		
-		Test test = new Hard7x7Test();
+		Test test = new HorsesPuzzleTest();
 		test.run();
 	}
 }

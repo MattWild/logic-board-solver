@@ -24,7 +24,7 @@ public class Restriction {
 			int[] indices = iterator.next();
 
 			if (indices[0] == i && indices[1] == j) {
-				restrictedOptions.remove(indices);
+				iterator.remove();
 				
 				if(isLink){
 					isLocked = true;

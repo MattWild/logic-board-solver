@@ -65,9 +65,6 @@ public class Solver {
 			
 			System.out.println("Extending Condensing");
 			checkCondensers();
-			checkRestrictions();
-			checkCondensers();
-			checkRestrictions();
 		} catch (LogicException e) {
 			// TODO Auto-generated catch block
 			System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());
@@ -97,7 +94,7 @@ public class Solver {
 	private void checkCondensers() throws SetupException, LogicException {
 		Set<Option> checkedOptions = new HashSet<Option>();
 		
-		for (int i = 1; i < lp.getOptionNum() - 1; i++) {
+		for (int i = 2; i < lp.getOptionNum() - 1; i++) {
 			for (int cat = 0; cat < lp.getCategoryNum(); cat++)
 				for (int opt = 0; opt < lp.getOptionNum(); opt++) {
 					Option option = lp.getOption(cat, opt);
