@@ -62,7 +62,6 @@ public class Solver {
 		try {
 			rm.applyRulesTo(lp);
 			
-			
 			System.out.println("Extending Condensing");
 			checkCondensers();
 		} catch (LogicException e) {

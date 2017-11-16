@@ -16,54 +16,91 @@ import objects.Relation;
 
 public class RelationRule implements Rule {
 	
-	String mainCategory;
-	String category1;
-	String category2;
-	String option1;
-	String option2;
-	int difference;
+	private LogicPuzzle lp;
+	private int mainCategory;
+	private int category1;
+	private int category2;
+	private int option1;
+	private int option2;
+	private int difference;
 	
 	/**
 	 * 
+	 * @param lp 
 	 * @param string
+	 * @throws SetupException 
 	 */
 
-	public RelationRule(String string) {
+	public RelationRule(LogicPuzzle lp, String string) throws SetupException {
 		String[] x = string.split(" ");
 		
-		mainCategory = x[0];
-		category1 = x[1];
-		category2 = x[2];
-		option1 = x[3];
-		option2 = x[4];
+		mainCategory = lp.getCategoryFromName(x[0]);
+		category1 = lp.getCategoryFromName(x[1]);
+		category2 = lp.getCategoryFromName(x[2]);
+		option1 = lp.getOptionFromName(category1, x[3]);
+		option2 = lp.getOptionFromName(category2, x[4]);
 		difference = Integer.parseInt(x[5]);
 	}
 
+	public RelationRule(LogicPuzzle lp) {
+		this.lp = lp;
+	}
+
+	public void setMainCategory(String mainCategory) throws SetupException {
+		this.mainCategory = lp.getCategoryFromName(mainCategory);
+	}
+
+
+
+	public void setCategory1(String category1) throws SetupException {
+		this.category1 = lp.getCategoryFromName(category1);
+	}
+
+
+
+	public void setCategory2(String category2) throws SetupException {
+		this.category2 = lp.getCategoryFromName(category2);
+	}
+
+
+
+	public void setOption1(String option1) throws SetupException {
+		this.option1 = lp.getOptionFromName(category1, option1);
+	}
+
+
+
+	public void setOption2(String option2) throws SetupException {
+		this.option2 = lp.getOptionFromName(category2, option2);
+	}
+
+
+
+	public void setDifference(int difference) {
+		this.difference = difference;
+	}
+
+
+
 	@Override
-	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException {
-		int main = lp.getCategoryFromName(mainCategory);
-		int cat1 = lp.getCategoryFromName(category1);
-		int cat2 = lp.getCategoryFromName(category2);
-		int opt1 = lp.getOptionFromName(cat1, option1);
-		int opt2 = lp.getOptionFromName(cat2, option2);
-		
-		Option option1 = lp.getOption(cat1, opt1);
-		Option option2 = lp.getOption(cat2, opt2);
+	public void apply() throws LogicException, SetupException {
+		Option opt1 = lp.getOption(category1, option1);
+		Option opt2 = lp.getOption(category2, option2);
 		
 		Relation r;
 		if (difference == 0) {
-			r = new Relation(main, cat1, opt1, cat2, opt2, -1, true);
+			r = new Relation(mainCategory, category1, option1, category2, option2, -1, true);
 		} else {
 			int[] param = lp.getCategoryParams(mainCategory);	
 			System.out.println(difference / param[1]);
-			r = new Relation(main, cat1, opt1, cat2, opt2, difference / param[1], false);
+			r = new Relation(mainCategory, category1, option1, category2, option2, difference / param[1], false);
 		}
 		
-		option1.declareMiss(cat2, opt2);
-		option2.declareMiss(cat1, opt1);
+		opt1.declareMiss(category2, option2);
+		opt2.declareMiss(category1, option1);
 		
-		option1.addRelation(r, false);
-		option2.addRelation(r, true);
+		opt1.addRelation(r, false);
+		opt2.addRelation(r, true);
 	}
 
 }

@@ -1,5 +1,3 @@
-/exceptions/
-/objects/
-/rules/
-/solver/
-/test/
+/logic/
+/presentation/
+/view/

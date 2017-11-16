@@ -20,6 +20,6 @@ public interface Rule {
 	 * @throws LogicException
 	 * @throws SetupException
 	 */
-	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException;
+	public void apply() throws LogicException, SetupException;
 	
 }

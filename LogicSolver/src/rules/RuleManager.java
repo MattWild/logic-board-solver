@@ -14,42 +14,53 @@ import objects.LogicPuzzle;
 
 public class RuleManager {
 	
-	ArrayList<Rule> rules;
+	private ArrayList<Rule> rules;
+	private LogicPuzzle lp;
 	
-	public RuleManager(String[] ruleList) {
-		 rules = new ArrayList<Rule>();
-		 for (String rule : ruleList) 
-			 addRule(rule);
+	public RuleManager(LogicPuzzle lp) {
+		this.lp = lp;
+		rules = new ArrayList<Rule>();
 	}
 	
+	public RuleManager(String[] ruleList, LogicPuzzle lp) throws SetupException {
+		this(lp);
+		for (String rule : ruleList) 
+			 addRule(rule);
+	}
+
 	/**
 	 * constructs a new rule of specific type from a formatted string
 	 * 
 	 * @param ruleString
+	 * @throws SetupException 
 	 */
 	
-	public void addRule(String ruleString) {
+	public void addRule(String ruleString) throws SetupException {
 		int type = Integer.parseInt(ruleString.substring(0,1));
 		Rule rule = null;
 		
 		switch(type) {
 		case 0:
-			rule = new DeclarationRule(ruleString.substring(2));
+			rule = new DeclarationRule(lp, ruleString.substring(2));
 			break;
 			
 		case 1:
-			rule = new RestrictionRule(ruleString.substring(2));
+			rule = new RestrictionRule(lp, ruleString.substring(2));
 			break;
 			
 		case 2:
-			rule = new RelationRule(ruleString.substring(2));
+			rule = new RelationRule(lp, ruleString.substring(2));
 			break;
 			
 		case 3:
-			rule = new DoubleRestrictionRule(ruleString.substring(2));
+			rule = new DoubleRestrictionRule(lp, ruleString.substring(2));
 			break;
 		}
 		
+		rules.add(rule);
+	}
+	
+	public void addRule(Rule rule) {
 		rules.add(rule);
 	}
 
@@ -62,8 +73,13 @@ public class RuleManager {
 
 	public void applyRulesTo(LogicPuzzle lp) throws LogicException, SetupException {
 		for (Rule r : rules) {
-			r.applyTo(lp);
+			if (r == null) continue;
+			r.apply();
 			lp.printBoard();
 		}
+	}
+
+	public void clear() {
+		rules.clear();
 	}
 }

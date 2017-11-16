@@ -11,7 +11,7 @@ public class LogicPuzzle {
 	Option[][] options;
 	String[][] optionNames;
 	String[] categoryNames;
-	Map<String, int[]> categoryParams;
+	Map<Integer, int[]> categoryParams;
 	private int optionNum;
 	
 	public LogicPuzzle(String[] categoryNames, String[][] optionNames) {
@@ -19,7 +19,7 @@ public class LogicPuzzle {
 		this.optionNames = optionNames;
 		this.options = new Option[optionNames.length][optionNames[0].length];
 		this.optionNum = this.options[0].length;
-		this.categoryParams = new HashMap<String, int[]>();
+		this.categoryParams = new HashMap<Integer, int[]>();
 		
 		for (int i = 0; i < this.options.length; i++) {
 			for (int j = 0; j < this.options[0].length; j++) {
@@ -51,7 +51,7 @@ public class LogicPuzzle {
 			if(split.length > 1) {
 				try {
 					categoryNames[i] = split[0];
-					categoryParams.put(split[0], new int[]{Integer.parseInt(split[1]), Integer.parseInt(split[2])});
+					categoryParams.put(i, new int[]{Integer.parseInt(split[1]), Integer.parseInt(split[2])});
 				} catch (NumberFormatException e) {
 					throw new SetupException("parameters for category not parseable as integers: " + split[0]);
 				} catch (IndexOutOfBoundsException e) {
@@ -114,12 +114,12 @@ public class LogicPuzzle {
 		return optionNum;
 	}
 	
-	public int[] getCategoryParams(String catName) throws SetupException {
-		int[] params = categoryParams.get(catName);
+	public int[] getCategoryParams(int mainCategory) throws SetupException {
+		int[] params = categoryParams.get(mainCategory);
 		if (params != null)
 			return params;
 		else 
-			throw new SetupException("category not found or does not have parameters: " + catName);
+			throw new SetupException("category not found or does not have parameters: " + mainCategory);
 	}
 	
 	public void printBoard() {

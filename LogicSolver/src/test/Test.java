@@ -1,5 +1,6 @@
 package test;
 
+import exceptions.SetupException;
 import objects.LogicPuzzle;
 import rules.RuleManager;
 import solver.Solver;
@@ -107,7 +108,12 @@ public abstract class Test {
 		System.out.println("TEST: " + title + "\n");
 		
 		LogicPuzzle lp = new LogicPuzzle(categories, options);
-		RuleManager rm = new RuleManager(rules);
+		RuleManager rm = null;
+		try {
+			rm = new RuleManager(rules, lp);
+		} catch (SetupException e) {
+			e.printStackTrace();
+		}
 		Solver solver = new Solver(lp, rm);		
 		
 		System.out.println("START\n");

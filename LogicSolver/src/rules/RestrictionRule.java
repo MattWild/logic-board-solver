@@ -22,47 +22,55 @@ import objects.Restriction;
 
 public class RestrictionRule implements Rule {
 	
-	String categoryToRestrict;
-	ArrayList<String> targetCategories;
-	String optionToRestrict;
-	ArrayList<String> targetOptions;
+	LogicPuzzle lp;
+	private int categoryToRestrict;
+	private int optionToRestrict;
+	Set<int[]> restrictedCategoryOptions;
+	
+
+	public RestrictionRule(LogicPuzzle lp) {
+		this.lp = lp;
+		restrictedCategoryOptions = new HashSet<int[]>();
+	}
 
 	/**
 	 * 
+	 * @param lp 
 	 * @param string
+	 * @throws SetupException 
 	 */
 	
-	public RestrictionRule(String string) {
-		targetCategories = new ArrayList<String>();
-		targetOptions = new ArrayList<String>();
+	public RestrictionRule(LogicPuzzle lp, String string) throws SetupException {
+		this(lp);
 		
 		String[] x = string.split(" ");
 		
-		categoryToRestrict = x[0];
-		optionToRestrict = x[1];
+		categoryToRestrict = this.lp.getCategoryFromName(x[0]);
+		optionToRestrict = this.lp.getOptionFromName(categoryToRestrict, x[1]);
 		for(int i = 2; i + 1 < x.length; i += 2) {
-			targetCategories.add(x[i]);
-			targetOptions.add(x[i+1]);
+			int tarCat = this.lp.getCategoryFromName(x[i]);
+			int tarOpt = this.lp.getOptionFromName(tarCat, x[i+1]);
+			
+			restrictedCategoryOptions.add(new int[]{tarCat, tarOpt});
 		}
-		
+	}
+
+	public void setCategoryToRestrict(String categoryToRestrict) throws SetupException {
+		this.categoryToRestrict = lp.getCategoryFromName(categoryToRestrict);
+	}
+
+	public void setOptionToRestrict(String optionToRestrict) throws SetupException {
+		this.optionToRestrict = lp.getOptionFromName(categoryToRestrict, optionToRestrict);
 	}
 	
+	public void addTargetOption(int categoryIndex, String targetOption) throws SetupException {
+		restrictedCategoryOptions.add(new int[]{categoryIndex, lp.getOptionFromName(categoryIndex, targetOption)});
+	}
+
 
 	@Override
-	public void applyTo(LogicPuzzle lp) throws LogicException, SetupException {
-		int catRes = lp.getCategoryFromName(categoryToRestrict);
-		int optRes = lp.getOptionFromName(catRes, optionToRestrict);
-		
-		Set<int[]> restrictedOptions = new HashSet<int[]>();
-		
-		for (int i = 0; i < targetCategories.size(); i++) {
-			int tarCat = lp.getCategoryFromName(targetCategories.get(i));
-			int tarOpt = lp.getOptionFromName(tarCat, targetOptions.get(i));
-			
-			restrictedOptions.add(new int[]{tarCat, tarOpt});
-		}
-		
-		List<int[]> resOptList = new ArrayList<int[]>(restrictedOptions);
+	public void apply() throws LogicException, SetupException {
+		List<int[]> resOptList = new ArrayList<int[]>(restrictedCategoryOptions);
 		
 		for (int i = 0; i < resOptList.size(); i++) {
 			int[] catOptIndex = resOptList.get(i);
@@ -76,8 +84,8 @@ public class RestrictionRule implements Rule {
 			}
 		}
 		
-		Restriction r = new Restriction(restrictedOptions);
-		lp.getOption(catRes, optRes).addRestriction(r);
+		Restriction r = new Restriction(restrictedCategoryOptions);
+		lp.getOption(categoryToRestrict, optionToRestrict).addRestriction(r);
 	}
 
 }
