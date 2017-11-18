@@ -13,48 +13,32 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import objects.LogicPuzzle;
 import presentation.model.LogicBoardModel;
+import presentation.view.CategoryOptionInputController;
 import presentation.view.LogicBoardOverviewController;
+import presentation.view.SetUpScreenController;
 
 public class MainApp extends Application {
 
 	private Stage primaryStage;
     private BorderPane rootLayout;
     private LogicPuzzle lp;
+    private String[] categories;
+    private String[][] options;
 	private ObservableList<StringProperty> categoryNames;
 	private ObservableList<ObservableList<StringProperty>> optionNames;
 	private final IntegerProperty categoryNumber;
 	private final IntegerProperty optionNumber;
+	private int categoryCount;
 	
 	
 
 	public MainApp() {
-		String[] categories = new String[]{"order 1 1", "color", "item", "knitter"};
-		
-		String[][] options = new String[][]{
-				{"1","2","3","4"},
-				{"black","purple","silver","white"},
-				{"blanket","hat","scarf","sweater"},
-				{"Desiree","Jeanette","Ruth","Winfred"}
-				};
-		
-		lp = new LogicPuzzle(categories, options);
-		categoryNames = FXCollections.observableArrayList();
-		optionNames = FXCollections.observableArrayList();
-		categoryNumber = new SimpleIntegerProperty(categories.length);
-		optionNumber = new SimpleIntegerProperty(options[0].length);
-		
-		for (int i = 0; i < categories.length; i++) {
-			categoryNames.add(new SimpleStringProperty(categories[i]));
-		
-			ObservableList<StringProperty> sublist = FXCollections.observableArrayList();
-			for (String option : options[i]) {
-				sublist.add(new SimpleStringProperty(option));
-			}
-			optionNames.add(sublist);
-		}
+		categoryNumber = new SimpleIntegerProperty();
+		optionNumber = new SimpleIntegerProperty();
 	}
 	
 	@Override
@@ -64,9 +48,26 @@ public class MainApp extends Application {
 
         initRootLayout();
 
-        showLogicBoardOverview();
+        showSetUpScreen();
 	}
 	
+	private void showSetUpScreen() {
+		try {
+			// Load person overview.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/SetUpScreen.fxml"));
+            GridPane setupScreen = (GridPane) loader.load();
+
+            // Set person overview into the center of root layout.
+            rootLayout.setCenter(setupScreen);
+            
+            SetUpScreenController controller = loader.getController();
+            controller.setMainApp(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+
 	public void initRootLayout() {
         try {
             // Load root layout from fxml file.
@@ -100,6 +101,34 @@ public class MainApp extends Application {
         }
     }
 	
+	public void showCategoryOptionInput() {
+		try {
+            // Load person overview.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/CategoryOptionInput.fxml"));
+            AnchorPane personOverview = (AnchorPane) loader.load();
+
+            // Set person overview into the center of root layout.
+            rootLayout.setCenter(personOverview);
+            
+            CategoryOptionInputController controller = loader.getController();
+            controller.setMainApp(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	public void setupCategoriesOptions(int categoryNumber, int optionNumber) {
+		this.categoryNumber.set(categoryNumber);
+		this.optionNumber.set(optionNumber);
+		categoryCount = 0;
+		
+		categories = new String[categoryNumber];
+		options = new String[categoryNumber][];
+		
+		showCategoryOptionInput();
+	}
+	
 	public Stage getPrimaryStage() {
         return primaryStage;
     }
@@ -122,5 +151,38 @@ public class MainApp extends Application {
 	
 	public String getOption(int i, int j) {
 		return optionNames.get(i).get(j).get();
+	}
+	
+	public LogicPuzzle getLogicPuzzle() {
+		return lp;
+	}
+
+	public void checkReady(String categoryName, String[] optionNames) {
+		categories[categoryCount] = categoryName;
+		options[categoryCount] = optionNames;
+		
+		categoryCount++;
+		
+		if (categoryCount < categoryNumber.get()) {
+			showCategoryOptionInput();
+		} else {
+			lp = new LogicPuzzle(categories, options);
+			
+			categoryNames = FXCollections.observableArrayList();
+			this.optionNames = FXCollections.observableArrayList();
+			
+			for (int i = 0; i < categories.length; i++) {
+				categoryNames.add(new SimpleStringProperty(categories[i]));
+			
+				ObservableList<StringProperty> sublist = FXCollections.observableArrayList();
+				for (String option : options[i]) {
+					sublist.add(new SimpleStringProperty(option));
+				}
+				this.optionNames.add(sublist);
+			}
+			
+			showLogicBoardOverview();
+		}
+		
 	}
 }

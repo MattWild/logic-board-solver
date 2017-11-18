@@ -2,18 +2,16 @@ package presentation.view;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import presentation.MainApp;
 
@@ -30,26 +28,49 @@ public class LogicBoardOverviewController {
 	    @FXML
 	    private GridPane verticalOptions;
 	    
-	    private final int BOX_SIZE = 29;
-	    private final int ROWCOL_SIZE = 30;
+	    private static final int BOX_SIZE = 29;
+	    private static final int ROWCOL_SIZE = 30;
 	
 	 // Reference to the main application.
 	    private MainApp mainApp;
 	    
-	    static class ResizableRectangle extends Rectangle {
-	        ResizableRectangle(double w, double h) {
+	    private static class LogicRectangle extends Rectangle {
+	    	private int state;
+	    	
+	        LogicRectangle(double w, double h, int i, int j, int k, int l) {
 	            super(w, h);
+	            state = 0;
+	            fill();
+	            
+	            setOnMouseClicked(new EventHandler<MouseEvent>() {
+	            	@Override
+	            	public void handle(MouseEvent event) {
+	            		updateLink();
+	            	}
+	            });
 	        }
+	        
 
-	        @Override
-	        public boolean isResizable() {
-	            return true;
-	        }
-
-	        @Override
-	        public double minWidth(double height) {
-	            return 0.0;
-	        }
+    		protected void updateLink() {
+    			state = (state + 1) % 3;
+    			fill();
+    		}
+    		
+    		private void fill() {
+    			switch(state) {
+    				case 0:
+    					setFill(Color.WHITE);
+    					break;
+					
+    				case 1:
+    					setFill(Color.RED);
+    					break;
+    					
+    				case 2:
+    					setFill(Color.GREEN);
+    					break;
+    			}
+    		}
 	    }
 
 	    /**
@@ -140,8 +161,7 @@ public class LogicBoardOverviewController {
 	        	for (int j = 0; j < numCategories - i; j++) {
 	        		for(int k = 0; k < numOpts; k++) {
 	        			for (int l = 0; l < numOpts; l++) {
-	        				Rectangle rectangle = new Rectangle(BOX_SIZE, BOX_SIZE);
-				            rectangle.setFill(Color.WHITE);
+	        				LogicRectangle rectangle = new LogicRectangle(BOX_SIZE, BOX_SIZE, i, j, k, l);
 				            boardPane.add(rectangle, 2 + i*numOpts + k, 2 + j*numOpts + l);
 				            
 				            GridPane.setHalignment(rectangle, HPos.CENTER);
