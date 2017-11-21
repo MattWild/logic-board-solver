@@ -2,6 +2,7 @@ package rules;
 import java.util.ArrayList;
 import exceptions.LogicException;
 import exceptions.SetupException;
+import javafx.collections.ObservableList;
 import objects.LogicPuzzle;
 
 /**
@@ -81,5 +82,9 @@ public class RuleManager {
 
 	public void clear() {
 		rules.clear();
+	}
+
+	public ArrayList<Rule> getRules() {
+		return rules;
 	}
 }

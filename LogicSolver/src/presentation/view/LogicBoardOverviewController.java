@@ -2,34 +2,43 @@ package presentation.view;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Callback;
+
+import java.io.IOException;
+
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import presentation.MainApp;
+import rules.Rule;
 
 public class LogicBoardOverviewController {
 
 		@FXML
 	    private GridPane boardPane;
 	    @FXML
-	    private GridPane horizontalCategories;
-	    @FXML 
-	    private GridPane horizontalOptions;
-	    @FXML
-	    private GridPane verticalCategories;
-	    @FXML
-	    private GridPane verticalOptions;
+	    private ListView<Rule> rulesList;
 	    
 	    private static final int BOX_SIZE = 29;
 	    private static final int ROWCOL_SIZE = 30;
+	    
+	    @FXML 
+	    private void handleAddRuleButton() {
+	    	mainApp.showAddRuleDialog();
+	    }
 	
 	 // Reference to the main application.
 	    private MainApp mainApp;
@@ -72,6 +81,34 @@ public class LogicBoardOverviewController {
     			}
     		}
 	    }
+	    
+	    private class RuleCell extends ListCell<Rule> {
+	    	
+	    	private RuleCellController controller;
+	    	
+	    	public RuleCell() {
+	            try {
+	            	FXMLLoader loader = new FXMLLoader();
+	            	loader.setLocation(MainApp.class.getResource("view/RuleCell.fxml"));
+					loader.load();
+					controller = loader.getController();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    	}
+
+	    	@Override
+	        public void updateItem(Rule rule, boolean empty)
+	        {
+	            super.updateItem(rule,empty);
+	            if(rule != null)
+	            {
+	            	controller.setRuleString(rule);
+	                setGraphic(controller.getBox());
+	            }
+	        }
+	    }
 
 	    /**
 	     * The constructor.
@@ -99,6 +136,31 @@ public class LogicBoardOverviewController {
 	        
 	        setupBoardPane();
 	    }
+
+		private void setupBoardPane() {
+			int numCategories = mainApp.getCategoryNumber() - 1;
+	        int numOpts = mainApp.getOptionNumber();
+			
+			setupDimensions(numCategories, numOpts);
+			setupCategoryLabels(numCategories, numOpts);
+			setupOptionLabels(numCategories, numOpts);
+	        setupBoard(numCategories, numOpts);
+	        setupRulesList();
+		}
+
+		private void setupRulesList() {
+			ObservableList<Rule> rules = mainApp.getRules();
+			
+			rulesList.setItems(rules);
+			rulesList.setCellFactory(new Callback<ListView<Rule>, ListCell<Rule>>()
+	        {
+	            @Override
+	            public ListCell<Rule> call(ListView<Rule> listView)
+	            {
+	                return new RuleCell();
+	            }
+	        });
+		}
 
 		private void setupOptionLabels(int numCategories, int numOpts) {
 	        for (int i = 0; i < numCategories; i++) {
@@ -139,21 +201,6 @@ public class LogicBoardOverviewController {
 	        	boardPane.add(vertGroup, 0, 2 + i*numOpts, 1, numOpts);
 	        }
 			
-		}
-
-		private void setupBoardPane() {
-			int numCategories = mainApp.getCategoryNumber() - 1;
-	        int numOpts = mainApp.getOptionNumber();
-			
-			setupDimensions(numCategories, numOpts);
-			setupCategoryLabels(numCategories, numOpts);
-			setupOptionLabels(numCategories, numOpts);
-	        setupBoard(numCategories, numOpts);
-	        
-	        
-	        
-	        
-	        
 		}
 
 		private void setupBoard(int numCategories, int numOpts) {

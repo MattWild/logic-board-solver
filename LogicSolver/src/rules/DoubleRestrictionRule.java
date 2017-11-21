@@ -1,15 +1,7 @@
 package rules;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import exceptions.LogicException;
 import exceptions.SetupException;
 import objects.LogicPuzzle;
-import objects.Option;
-import objects.Restriction;
 
 public class DoubleRestrictionRule implements Rule {
 	
@@ -118,6 +110,23 @@ public class DoubleRestrictionRule implements Rule {
 	public void apply() throws LogicException, SetupException {
 		for(Rule r : subrules) 
 			r.apply();
+	}
+
+	@Override
+	public String buildRuleString() {
+		String str = "";
+		
+		str += "Of ";
+		str += options1[0] + " from " + categories1[0];
+		str += " and ";
+		str += options1[1] + " from " + categories1[1];
+		str += ", one is ";
+		str += options2[0] + " from " + categories2[0];
+		str += " and one is ";
+		str += options2[1] + " from " + categories2[1];
+		
+		
+		return str;
 	}
 
 }

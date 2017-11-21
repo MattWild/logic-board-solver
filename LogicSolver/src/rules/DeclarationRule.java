@@ -2,7 +2,6 @@ package rules;
 import exceptions.SetupException;
 import exceptions.LogicException;
 import objects.LogicPuzzle;
-import objects.Option;
 
 /**
  * This class defines a declaration rule, one that defines the 
@@ -78,6 +77,26 @@ public class DeclarationRule implements Rule {
 			e.addOption(category1, option1);
 			throw e;
 		}
+	}
+
+	@Override
+	public String buildRuleString() {
+		String str = "";
+		
+		try {
+			str += lp.getOptionName(category1, option1) + " from " + lp.getCategoryName(category1);
+			if (value == -1) 
+				str += " is not ";
+			else 
+				str += " is ";
+			str += lp.getOptionName(category2, option2) + " from " + lp.getCategoryName(category2);
+		} catch (SetupException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(str);
+		
+		return str;
 	}
 
 }

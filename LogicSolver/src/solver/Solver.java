@@ -1,5 +1,4 @@
 package solver;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,7 +6,6 @@ import exceptions.SetupException;
 import exceptions.LogicException;
 import objects.LogicPuzzle;
 import objects.Option;
-import objects.Relation;
 import rules.RuleManager;
 
 /**
@@ -64,6 +62,7 @@ public class Solver {
 			
 			System.out.println("Extending Condensing");
 			checkCondensers();
+			checkRestrictions();
 		} catch (LogicException e) {
 			// TODO Auto-generated catch block
 			System.err.println(e.getType() + " " + e.getCategory1Index() + " " + e.getOption1Index() +" " + e.getCategory2Index() + " " + e.getOption2Index());

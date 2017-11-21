@@ -22,6 +22,11 @@ public class CategoryOptionInputController {
 		
 		mainApp.checkReady(categoryName, optionNames);
 	}
+	
+	@FXML
+	private void handleNumericOptionSetUp() {
+		mainApp.setupNumericOption(categoryNameField.getText());
+	}
 
 	public void setMainApp(MainApp mainApp) {
 		this.mainApp = mainApp;

@@ -1,7 +1,6 @@
 package rules;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -86,6 +85,23 @@ public class RestrictionRule implements Rule {
 		
 		Restriction r = new Restriction(restrictedCategoryOptions);
 		lp.getOption(categoryToRestrict, optionToRestrict).addRestriction(r);
+	}
+
+	@Override
+	public String buildRuleString() {
+		String str = "";
+		try {
+			str +=  lp.getOptionName(categoryToRestrict, optionToRestrict)+ " from " + lp.getCategoryName(categoryToRestrict);
+			str += " is either";
+			for (int[] pair : restrictedCategoryOptions) {
+				str += " " + lp.getOptionName(pair[0], pair[1]) + " from " + lp.getCategoryName(pair[0]);
+			}
+		} catch (SetupException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return str;
 	}
 
 }

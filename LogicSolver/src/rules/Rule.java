@@ -1,7 +1,6 @@
 package rules;
 import exceptions.LogicException;
 import exceptions.SetupException;
-import objects.LogicPuzzle;
 
 /**
  * This interface defines a simple framework rules (hints) that
@@ -21,5 +20,7 @@ public interface Rule {
 	 * @throws SetupException
 	 */
 	public void apply() throws LogicException, SetupException;
+	
+	public String buildRuleString();
 	
 }
