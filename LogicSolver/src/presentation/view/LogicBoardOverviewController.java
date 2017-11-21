@@ -6,6 +6,10 @@ import javafx.util.Callback;
 
 import java.io.IOException;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -44,35 +48,53 @@ public class LogicBoardOverviewController {
 	    private MainApp mainApp;
 	    
 	    private static class LogicRectangle extends Rectangle {
-	    	private int state;
+	    	private IntegerProperty state;
 	    	
 	        LogicRectangle(double w, double h, int i, int j, int k, int l) {
 	            super(w, h);
-	            state = 0;
-	            fill();
+	            state = new SimpleIntegerProperty(1);
 	            
-	            setOnMouseClicked(new EventHandler<MouseEvent>() {
+	            state.addListener(new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+							Number newValue) {
+						fill();
+					}
+	            });
+	            
+	            /*setOnMouseClicked(new EventHandler<MouseEvent>() {
 	            	@Override
 	            	public void handle(MouseEvent event) {
 	            		updateLink();
 	            	}
-	            });
+	            });*/
 	        }
 	        
 
     		protected void updateLink() {
-    			state = (state + 1) % 3;
-    			fill();
+    			this.state.set((this.state.get() - 1) % 3);
+    		}
+    		
+    		public IntegerProperty state() {
+    			return state;
+    		}
+    		
+    		public void setState(int state) {
+    			this.state.set(state);
+    		}
+    		
+    		public int getState() {
+    			return state.get();
     		}
     		
     		private void fill() {
-    			switch(state) {
+    			switch(state.get()) {
     				case 0:
-    					setFill(Color.WHITE);
+    					setFill(Color.RED);
     					break;
 					
     				case 1:
-    					setFill(Color.RED);
+    					setFill(Color.WHITE);
     					break;
     					
     				case 2:

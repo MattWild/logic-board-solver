@@ -10,19 +10,42 @@ import java.util.Set;
 
 import exceptions.LogicException;
 import exceptions.SetupException;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 
 public class Option {
 	
 	private LogicPuzzle lp;
-	private Map<Integer, Set<Integer>> possibleLinks;
+	private Map<Integer, ObservableSet<Integer>> possibleLinks;
+	private Map<Integer, PossibilitiesListener> possibleListeners;
 	private Set<Restriction> restrictions;
 	private List<Map<Integer, Set<Relation>>> relations;
 	private int[] links;
 	
+	private class PossibilitiesListener implements SetChangeListener<Integer> {
+		
+		private int categoryIndex;
+		
+		public PossibilitiesListener(int categoryIndex) {
+			this.categoryIndex = categoryIndex;
+		}
+
+		@Override
+		public void onChanged(Change<? extends Integer> change) {
+			//mainApp.markMiss(categoryIndex, change.getElementRemoved());
+		}
+		
+	}
+	
 	
 	public Option(LogicPuzzle lp, int categoryNum, int optionNum, int categoryInd, int optionInd) {
 		this.lp = lp;
-		possibleLinks = new HashMap<Integer, Set<Integer>>();
+		possibleLinks = new HashMap<Integer, ObservableSet<Integer>>();
 		restrictions = new HashSet<Restriction>();
 		relations = new ArrayList<Map<Integer, Set<Relation>>>();
 		relations.add(new HashMap<Integer, Set<Relation>>());
@@ -34,13 +57,16 @@ public class Option {
 			if (i == categoryInd) {
 				links[i] = optionInd;
 			} else {
-				HashSet<Integer> categoryPossibilities = new HashSet<Integer>();
+				ObservableSet<Integer> categoryPossibilities = FXCollections.observableSet();
 				
+				PossibilitiesListener categoryListener = new PossibilitiesListener(i);
 				for (int j = 0; j < optionNum; j++)
 					categoryPossibilities.add(j);
+				categoryPossibilities.addListener(categoryListener);
 			
 				possibleLinks.put(i, categoryPossibilities);
-				links[i] = -1;
+				possibleListeners.put(i, categoryListener);
+;				links[i] = -1;
 			}
 		}
 	}
