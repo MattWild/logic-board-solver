@@ -2,7 +2,6 @@ package presentation.view;
 
 import java.util.ArrayList;
 
-import exceptions.SetupException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -11,8 +10,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
 import presentation.MainApp;
-import rules.DeclarationRule;
-import rules.Rule;
 
 public class AddRelationController {
 	
@@ -36,13 +33,13 @@ public class AddRelationController {
 	
 	@FXML
 	private void handleSubmit() {
-		mainApp.createRelationRule(mainCategoryBox.getSelectionModel().getSelectedItem(),
+		if (mainApp.createRelationRule(mainCategoryBox.getSelectionModel().getSelectedItem(),
 				greaterCategoryBox.getSelectionModel().getSelectedItem(),
 				greaterOptionBox.getSelectionModel().getSelectedItem(),
 				lesserCategoryBox.getSelectionModel().getSelectedItem(),
 				lesserOptionBox.getSelectionModel().getSelectedItem(),
-				valueBox.getSelectionModel().getSelectedItem());
-		dialogStage.close();
+				valueBox.getSelectionModel().getSelectedItem()))
+			dialogStage.close();
 	}
 	
 	private class categorySelectListener implements ChangeListener<Number> {
@@ -65,7 +62,7 @@ public class AddRelationController {
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 			ObservableList<String> newOptionValues;
-			newOptionValues = mainApp.getDifferenceOptions(newValue.intValue());
+			newOptionValues = mainApp.generateDifferenceOptions(newValue.intValue());
 			newOptionValues.add(0, "N/A");
 			valueBox.setItems(newOptionValues);
 		}
@@ -82,9 +79,10 @@ public class AddRelationController {
 		this.mainApp = mainApp;
 		
 		ObservableList<String> categories = mainApp.getCategories();
-		mainCategoryBox.setItems(categories);
 		greaterCategoryBox.setItems(categories);
 		lesserCategoryBox.setItems(categories);
+		ObservableList<String> numericCategories = mainApp.getNumericCategories();
+		mainCategoryBox.setItems(numericCategories);
 		
 		greaterCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new categorySelectListener(greaterCategoryBox));
 		lesserCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new categorySelectListener(lesserCategoryBox));

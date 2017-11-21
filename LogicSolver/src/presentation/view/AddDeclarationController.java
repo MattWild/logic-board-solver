@@ -33,14 +33,13 @@ public class AddDeclarationController {
 	
 	@FXML
 	private void handleSubmit() {
-		mainApp.createDeclarationRule(
+		if (mainApp.createDeclarationRule(
 				cat1Box.getSelectionModel().getSelectedItem(),
 				cat2Box.getSelectionModel().getSelectedItem(),
 				opt1Box.getSelectionModel().getSelectedItem(),
 				opt2Box.getSelectionModel().getSelectedItem(),
-				hitOrMissBox.getSelectionModel().getSelectedItem());
-		
-		dialogStage.close();
+				hitOrMissBox.getSelectionModel().getSelectedItem()))
+			dialogStage.close();
 	}
 	
 	private class categorySelectListener implements ChangeListener<Number> {

@@ -7,8 +7,6 @@ import exceptions.SetupException;
 import javafx.application.Application;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -49,15 +47,58 @@ public class MainApp extends Application {
 	private final IntegerProperty categoryNumber;
 	private final IntegerProperty optionNumber;
 	private int categoryCount;
-	
-	
 
+	
 	public MainApp() {
 		categoryNumber = new SimpleIntegerProperty();
 		optionNumber = new SimpleIntegerProperty();
 		categoryNames = FXCollections.observableArrayList();
 		this.optionNames = FXCollections.observableArrayList();
 		rules = FXCollections.observableArrayList();
+	}
+	
+	public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+	
+	public int getCategoryNumber() {
+		return categoryNumber.get();
+	}
+	
+	public int getOptionNumber() {
+		return optionNumber.get();
+	}
+	
+	public String getCategory(int i) {
+		return categoryNames.get(i);
+	}
+	
+	public String getOption(int i, int j) {
+		return optionNames.get(i).get(j);
+	}
+	
+	public LogicPuzzle getLogicPuzzle() {
+		return lp;
+	}
+	
+	public ObservableList<String> getCategories() {
+		return categoryNames;
+	}
+
+	public ObservableList<Rule> getRules() {
+		return rules;
+	}
+	
+	public ObservableList<String> getOptionsFromCategory(String catName) {
+		return optionNames.get(categoryNames.indexOf(catName));
+	}
+
+	public ObservableList<String> getOptionsFromCategory(int index) {
+		return optionNames.get(index);
+	}
+	
+	public static void main(String[] args) {
+		launch(args);
 	}
 	
 	@Override
@@ -70,6 +111,22 @@ public class MainApp extends Application {
         showSetUpScreen();
 	}
 	
+	public void initRootLayout() {
+        try {
+            // Load root layout from fxml file.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
+            rootLayout = (BorderPane) loader.load();
+
+            // Show the scene containing the root layout.
+            Scene scene = new Scene(rootLayout);
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 	private void showSetUpScreen() {
 		try {
 			// Load person overview.
@@ -86,22 +143,6 @@ public class MainApp extends Application {
             e.printStackTrace();
         }
 	}
-
-	public void initRootLayout() {
-        try {
-            // Load root layout from fxml file.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
-            rootLayout = (BorderPane) loader.load();
-
-            // Show the scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 	public void showLogicBoardOverview() {
         try {
@@ -147,34 +188,6 @@ public class MainApp extends Application {
 		
 		showCategoryOptionInput();
 	}
-	
-	public Stage getPrimaryStage() {
-        return primaryStage;
-    }
-	
-	public static void main(String[] args) {
-		launch(args);
-	}
-	
-	public int getCategoryNumber() {
-		return categoryNumber.get();
-	}
-	
-	public int getOptionNumber() {
-		return optionNumber.get();
-	}
-	
-	public String getCategory(int i) {
-		return categoryNames.get(i);
-	}
-	
-	public String getOption(int i, int j) {
-		return optionNames.get(i).get(j);
-	}
-	
-	public LogicPuzzle getLogicPuzzle() {
-		return lp;
-	}
 
 	public void checkReady(String categoryName, String[] optionNames) {
 		categories[categoryCount] = categoryName;
@@ -201,7 +214,72 @@ public class MainApp extends Application {
 			
 			showLogicBoardOverview();
 		}
-		
+	}
+	
+	public int[] showNumericOptionDialog() {
+		try {
+            // Load person overview.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/NumericOptionDialog.fxml"));
+            AnchorPane addRulePage = (AnchorPane) loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Numeric Option Setup");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(addRulePage);
+            dialogStage.setScene(scene);
+            
+            NumericOptionDialogController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(dialogStage);
+            dialogStage.showAndWait();
+            
+            if (controller.hasSubmitted()) {
+            	return controller.getParameters();
+            } else {
+            	return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+	}
+
+	public void setupNumericOption(String categoryName) {
+		int[] parameters = showNumericOptionDialog();
+		if (options != null) {
+			categoryName += " " + parameters[0] + " " + parameters[1];
+			String[] options = new String[optionNumber.get()];
+			
+			for (int i = 0; i < optionNumber.get(); i++) {
+				options[i] = Integer.toString(parameters[0] + (parameters[1] * i));
+			}
+			checkReady(categoryName, options);
+		}
+	}
+
+	public void showAddRuleDialog() {
+		try {
+            // Load person overview.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/AddRuleDialog.fxml"));
+            AnchorPane addRulePage = (AnchorPane) loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Add Rule");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(addRulePage);
+            dialogStage.setScene(scene);
+            
+            AddRuleDialogController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(dialogStage);
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 	}
 
 	public void createRule(Integer ruleIndex, Stage dialogStage) {
@@ -216,12 +294,12 @@ public class MainApp extends Application {
 			showAddRelation(dialogStage);
 			break;
 		case 3:
-			showAddDoubleRestriciton(dialogStage);
+			showAddDoubleRestriction(dialogStage);
 			break;
 		}
 	}
 
-	private void showAddDoubleRestriciton(Stage dialogStage) {
+	private void showAddDoubleRestriction(Stage dialogStage) {
 		try {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
@@ -297,72 +375,7 @@ public class MainApp extends Application {
         }
 	}
 
-	public void showAddRuleDialog() {
-		try {
-            // Load person overview.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/AddRuleDialog.fxml"));
-            AnchorPane addRulePage = (AnchorPane) loader.load();
-
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Add Rule");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(primaryStage);
-            Scene scene = new Scene(addRulePage);
-            dialogStage.setScene(scene);
-            
-            AddRuleDialogController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.setDialogStage(dialogStage);
-            dialogStage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-	}
-	
-	public int[] showNumericOptionDialog() {
-		try {
-            // Load person overview.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/NumericOptionDialog.fxml"));
-            AnchorPane addRulePage = (AnchorPane) loader.load();
-
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Numeric Option Setup");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(primaryStage);
-            Scene scene = new Scene(addRulePage);
-            dialogStage.setScene(scene);
-            
-            NumericOptionDialogController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.setDialogStage(dialogStage);
-            dialogStage.showAndWait();
-            
-            if (controller.hasSubmitted()) {
-            	return controller.getParameters();
-            } else {
-            	return null;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-	}
-	
-	public ObservableList<String> getCategories() {
-		return categoryNames;
-	}
-	
-	public ObservableList<String> getOptionsFromCategory(String catName) {
-		return optionNames.get(categoryNames.indexOf(catName));
-	}
-
-	public ObservableList<String> getOptionsFromCategory(int index) {
-		return optionNames.get(index);
-	}
-
-	public void createDeclarationRule(String cat1Name, String cat2Name, String opt1Name,
+	public boolean createDeclarationRule(String cat1Name, String cat2Name, String opt1Name,
 			String opt2Name, String hitmissString) {
 		
 		try {
@@ -378,17 +391,14 @@ public class MainApp extends Application {
 			}
 			
 			rules.add(rule);
+			
+			return true;
 		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
 	}
 
-	public ObservableList<Rule> getRules() {
-		return rules;
-	}
-
-	public void createRestrictionRule(String catToRestrictName, String optToRestrictName, String targetCat1Name,
+	public boolean createRestrictionRule(String catToRestrictName, String optToRestrictName, String targetCat1Name,
 			String targetCat2Name, String targetOpt1Name, String targetOpt2Name) {
 		
 		try {
@@ -399,13 +409,14 @@ public class MainApp extends Application {
 			rule.addTargetOption(lp.getCategoryFromName(targetCat2Name), targetOpt2Name);
 			
 			rules.add(rule);
+			
+			return true;
 		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
 	}
 
-	public void createDoubleRestrictionRule(String category00Name, String category01Name, String category10Name,
+	public boolean createDoubleRestrictionRule(String category00Name, String category01Name, String category10Name,
 			String category11Name, String option00Name, String option01Name, String option10Name,
 			String option11Name) {
 		
@@ -420,37 +431,11 @@ public class MainApp extends Application {
 		rule.setSecondOptionInSecondPair(option11Name);
 		
 		rules.add(rule);
+		
+		return true;
 	}
 
-	public void setupNumericOption(String categoryName) {
-		int[] parameters = showNumericOptionDialog();
-		if (options != null) {
-			categoryName += " " + parameters[0] + " " + parameters[1];
-			String[] options = new String[optionNumber.get()];
-			
-			for (int i = 0; i < optionNumber.get(); i++) {
-				options[i] = Integer.toString(parameters[0] + (parameters[1] * i));
-			}
-			checkReady(categoryName, options);
-		}
-	}
-
-	public ObservableList<String> getDifferenceOptions(int categoryIndex) {
-		ArrayList<String> differenceOptions = new ArrayList<String>();
-		int difference = -1;
-		try {
-			difference = lp.getCategoryParams(categoryIndex)[1];
-		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for (int i = 1; i < optionNumber.get() - 1; i++) {
-			differenceOptions.add(Integer.toString(i * difference));
-		}
-		return FXCollections.observableArrayList(differenceOptions);
-	}
-
-	public void createRelationRule(String mainCategoryName, String greaterCategoryName, String greaterOptionName,
+	public boolean createRelationRule(String mainCategoryName, String greaterCategoryName, String greaterOptionName,
 			String lesserCategoryName, String lesserOptionName, String valueString) {
 		RelationRule rule = new RelationRule(lp);
 		try {
@@ -465,10 +450,39 @@ public class MainApp extends Application {
 				rule.setDifference(Integer.parseInt(valueString));
 			}
 			rules.add(rule);
+			
+			return true;
+		} catch (SetupException e) {
+			return false;
+		}
+	}
+
+	public ObservableList<String> generateDifferenceOptions(int categoryIndex) {
+		ArrayList<String> differenceOptions = new ArrayList<String>();
+		int difference = -1;
+		try {
+			difference = lp.getCategoryParams(categoryIndex)[1];
 		} catch (SetupException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		for (int i = 1; i < optionNumber.get(); i++) {
+			differenceOptions.add(Integer.toString(i * difference));
+		}
+		return FXCollections.observableArrayList(differenceOptions);
+	}
+
+	public ObservableList<String> getNumericCategories() {
+		ObservableList<String> list = FXCollections.observableArrayList();
 		
+		for (String categoryName : categoryNames)
+			try {
+				lp.getCategoryParams(lp.getCategoryFromName(categoryName));
+				list.add(categoryName);
+			} catch (SetupException e) {
+				
+			}
+		
+		return list;
 	}
 }

@@ -36,13 +36,13 @@ public class AddRestrictionController {
 	
 	@FXML
 	private void handleSubmit() {
-		mainApp.createRestrictionRule(catToRestrictBox.getSelectionModel().getSelectedItem(),
+		if (mainApp.createRestrictionRule(catToRestrictBox.getSelectionModel().getSelectedItem(),
 				optToRestrictBox.getSelectionModel().getSelectedItem(),
 				targetCat1Box.getSelectionModel().getSelectedItem(),
 				targetCat2Box.getSelectionModel().getSelectedItem(),
 				targetOpt1Box.getSelectionModel().getSelectedItem(),
-				targetOpt2Box.getSelectionModel().getSelectedItem());
-		dialogStage.close();
+				targetOpt2Box.getSelectionModel().getSelectedItem()))
+			dialogStage.close();
 	}
 	
 	private class categorySelectListener implements ChangeListener<Number> {

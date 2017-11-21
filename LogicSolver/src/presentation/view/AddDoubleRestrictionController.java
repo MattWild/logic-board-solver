@@ -42,15 +42,15 @@ public class AddDoubleRestrictionController {
 	
 	@FXML
 	private void handleSubmit() {
-		mainApp.createDoubleRestrictionRule(category00Box.getSelectionModel().getSelectedItem(),
+		if (mainApp.createDoubleRestrictionRule(category00Box.getSelectionModel().getSelectedItem(),
 				category01Box.getSelectionModel().getSelectedItem(),
 				category10Box.getSelectionModel().getSelectedItem(),
 				category11Box.getSelectionModel().getSelectedItem(),
 				option00Box.getSelectionModel().getSelectedItem(),
 				option01Box.getSelectionModel().getSelectedItem(),
 				option10Box.getSelectionModel().getSelectedItem(),
-				option11Box.getSelectionModel().getSelectedItem());
-		dialogStage.close();
+				option11Box.getSelectionModel().getSelectedItem()))
+			dialogStage.close();
 	}
 	
 	private class categorySelectListener implements ChangeListener<Number> {
