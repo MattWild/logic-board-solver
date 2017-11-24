@@ -11,21 +11,25 @@ import java.util.Set;
 import exceptions.LogicException;
 import exceptions.SetupException;
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.concurrent.Task;
 
 public class Option {
 	
-	private LogicPuzzle lp;
+	private PuzzleLogic logic;
 	private Map<Integer, ObservableSet<Integer>> possibleLinks;
 	private Map<Integer, PossibilitiesListener> possibleListeners;
 	private Set<Restriction> restrictions;
 	private List<Map<Integer, Set<Relation>>> relations;
-	private int[] links;
+	private IntegerProperty[] links;
 	
 	private class PossibilitiesListener implements SetChangeListener<Integer> {
 		
@@ -37,56 +41,78 @@ public class Option {
 
 		@Override
 		public void onChanged(Change<? extends Integer> change) {
-			//mainApp.markMiss(categoryIndex, change.getElementRemoved());
-		}
+			for (int i = 0; i < links.length; i++)
+				if (links[i].get() != -1 && i != categoryIndex) {
+			    	logic.updateBoardMiss(i, links[i].get(), categoryIndex, change.getElementRemoved());
+				}
+		}	
+	}
+	
+	private class LinkListener implements ChangeListener<Number> {
 		
+		private int categoryIndex;
+		
+		public LinkListener(int categoryIndex) {
+			this.categoryIndex = categoryIndex;
+		}
+
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			for (int i = 0; i < links.length; i++)
+				if (links[i].get() != -1 && i != categoryIndex) {
+					System.out.println(i + " " + newValue.intValue() + " " + oldValue.intValue());
+					logic.updateBoardHit(i, links[i].get(), categoryIndex, newValue.intValue());
+				}
+		}	
 	}
 	
 	
-	public Option(LogicPuzzle lp, int categoryNum, int optionNum, int categoryInd, int optionInd) {
-		this.lp = lp;
+	public Option(PuzzleLogic logic, int categoryInd, int optionInd) {
+		this.logic = logic;
 		possibleLinks = new HashMap<Integer, ObservableSet<Integer>>();
+		possibleListeners = new HashMap<Integer, PossibilitiesListener>();
 		restrictions = new HashSet<Restriction>();
 		relations = new ArrayList<Map<Integer, Set<Relation>>>();
 		relations.add(new HashMap<Integer, Set<Relation>>());
 		relations.add(new HashMap<Integer, Set<Relation>>());
 		
-		links = new int[categoryNum];
+		links = new IntegerProperty[logic.getCategoryNum()];
 		
-		for (int i = 0; i < categoryNum; i++) {
+		for (int i = 0; i < logic.getCategoryNum(); i++) {
 			if (i == categoryInd) {
-				links[i] = optionInd;
+				links[i] = new SimpleIntegerProperty(optionInd);
 			} else {
 				ObservableSet<Integer> categoryPossibilities = FXCollections.observableSet();
 				
 				PossibilitiesListener categoryListener = new PossibilitiesListener(i);
-				for (int j = 0; j < optionNum; j++)
+				for (int j = 0; j < logic.getOptionNum(); j++)
 					categoryPossibilities.add(j);
 				categoryPossibilities.addListener(categoryListener);
 			
 				possibleLinks.put(i, categoryPossibilities);
 				possibleListeners.put(i, categoryListener);
-;				links[i] = -1;
+				links[i] = new SimpleIntegerProperty(-1);
+				links[i].addListener(new LinkListener(i));
 			}
 		}
 	}
 	
 	//Getter methods
 	
-	public LogicPuzzle getLogicPuzzle() {
-		return lp;
+	public PuzzleLogic getLogicPuzzle() {
+		return logic;
 	}
 	
-	public int[] getLinks() {
+	public IntegerProperty[] getLinks() {
 		return links;
 	}
 	
 	public int getLink(int i) {
-		return links[i];
+		return links[i].get();
 	}
 
 	public boolean isLinked(int i) {
-		return links[i] != -1;
+		return links[i].get() != -1;
 	}
 	
 	public Set<Integer> getPossibilities(int categoryIndex) {
@@ -107,8 +133,8 @@ public class Option {
 	//Basic Declaration Methods and Restriction/Relation Adding Methods
 	
 	public void declareMiss(int categoryIndex, int optionIndex) throws SetupException, LogicException {
-		if (links[categoryIndex] != -1) {
-			if (links[categoryIndex] == optionIndex) 
+		if (isLinked(categoryIndex)) {
+			if (links[categoryIndex].get() == optionIndex) 
 				throw new LogicException(0, categoryIndex, optionIndex);
 			else 
 				return;
@@ -121,8 +147,8 @@ public class Option {
 	}
 	
 	public void declareLink(int categoryIndex, int optionIndex) throws SetupException, LogicException {
-		if (links[categoryIndex] != -1) {
-			if (links[categoryIndex] == optionIndex) 
+		if (isLinked(categoryIndex)) {
+			if (links[categoryIndex].get() == optionIndex) 
 				return;
 			else 
 				throw new LogicException(1, categoryIndex, optionIndex);
@@ -140,7 +166,7 @@ public class Option {
 		
 		while(iterator.hasNext()) {
 			int[] indices = iterator.next();
-			options.add(lp.getOption(indices[0], indices[1]));
+			options.add(logic.getOption(indices[0], indices[1]));
 		}
 		
 		restrictions.add(r);
@@ -163,9 +189,9 @@ public class Option {
 		relations.get(x).get(r.getMainCategoryIndex()).add(r);
 		
 		if (relations.get(y).get(r.getMainCategoryIndex()) != null) {
-			Option option1 = lp.getOption(r.getCategoryIndex(!otherIsLesser), r.getOptionIndex(!otherIsLesser));
+			Option option1 = logic.getOption(r.getCategoryIndex(!otherIsLesser), r.getOptionIndex(!otherIsLesser));
 			for(Relation relation : relations.get(y).get(r.getMainCategoryIndex())) {
-				Option option2 = lp.getOption(relation.getCategoryIndex(otherIsLesser), relation.getOptionIndex(otherIsLesser));
+				Option option2 = logic.getOption(relation.getCategoryIndex(otherIsLesser), relation.getOptionIndex(otherIsLesser));
 				
 				option1.declareMiss(option2);
 				option2.declareMiss(option1);
@@ -181,7 +207,7 @@ public class Option {
 		Set<Integer> possibilities;
 		
 		for(int i = 0; i < possibleLinks.size(); i++) {
-			if (links[i] == -1) {
+			if (!isLinked(i)) {
 				possibilities = possibleLinks.get(i);
 
 				if (possibilities.size() == filterAmount) {
@@ -190,7 +216,7 @@ public class Option {
 
 					int j = 0;
 					while (iterator.hasNext()) {
-						condensers[j] = lp.getOption(i, iterator.next());
+						condensers[j] = logic.getOption(i, iterator.next());
 						j++;
 					}
 
@@ -208,7 +234,8 @@ public class Option {
 			int j = 0;
 			while (iterator.hasNext()) {
 				int[] catOpt = iterator.next();
-				condensers[j] = lp.getOption(catOpt[0], catOpt[1]);						j++;
+				condensers[j] =logic.getOption(catOpt[0], catOpt[1]);						
+				j++;
 			}
 				
 			condense(condensers);
@@ -216,36 +243,39 @@ public class Option {
 		
 	}
 	
-	//Private Helper Methods
+	//Private Helogicer Methods
 	
 	private void absorbOption(int i, int link) throws SetupException, LogicException {
-		Option toAbsorb = lp.getOption(i, link);
+		Option toAbsorb = logic.getOption(i, link);
 		
 		for (int j = 0; j < links.length; j++) {
 			if (toAbsorb.getLink(j) != -1) {
-				links[j] = toAbsorb.getLink(j);
-				lp.setOption(j, links[j], this);
+				logic.setOption(j, links[j].get(), this);
+				if(toAbsorb.getPossibilities(j) != null && toAbsorb.getPossibilities(j).size() != 0) 
+					possibleLinks.get(j).addAll(toAbsorb.getPossibilities(j));
+				if(possibleLinks.get(j) != null)
+					possibleLinks.get(j).clear();
+				links[j].set(toAbsorb.getLink(j));
 				System.out.println("Set Link: " + j + " " + links[j] + " in option: " + this);
 			}
 		}
 		
 		restrictions.addAll(toAbsorb.getRestrictions());
 		addRelations(toAbsorb);
-		lp.printBoard();
 	
 		condense(new Option[]{toAbsorb});
 		
 		Set<int[]> indices = new HashSet<int[]>();
 		Set<Option> options = new HashSet<Option>();
 		for(int cat = 0; cat < links.length; cat++) {
-			if (links[cat] != -1) 
-				for (int opt = 0; opt < lp.getOptionNum(); opt++) {
-					if (opt != links[cat]) {
+			if (isLinked(cat)) 
+				for (int opt = 0; opt < logic.getOptionNum(); opt++) {
+					if (opt != links[cat].get()) {
 						indices.add(new int[]{cat, opt});
 					}
 				}
 			else {
-				for (int opt = 0; opt < lp.getOptionNum(); opt++) {
+				for (int opt = 0; opt < logic.getOptionNum(); opt++) {
 					if (!possibleLinks.get(cat).contains(opt)) {
 						indices.add(new int[]{cat, opt});
 					}
@@ -254,7 +284,7 @@ public class Option {
 		}
 		
 		for (int[] catOpt : indices) {
-			Option option = lp.getOption(catOpt[0], catOpt[1]);
+			Option option = logic.getOption(catOpt[0], catOpt[1]);
 			if(!options.contains(option)) {
 				try {
 					option.declareMiss(this);
@@ -296,7 +326,7 @@ public class Option {
 		
 		while (iterator.hasNext()) {
 			int i = iterator.next();
-			if(links[i] == -1) {
+			if(!isLinked(i)) {
 				newPossibilities = new HashSet<Integer>();
 				
 				for(Option o : condensers) {
@@ -313,7 +343,7 @@ public class Option {
 	}
 	
 	private void inferLinks(int categoryIndex) throws SetupException, LogicException {
-		if (links[categoryIndex] == -1) {
+		if (!isLinked(categoryIndex)) {
 			Iterator<Integer> iterator = possibleLinks.get(categoryIndex).iterator();
 			if (iterator.hasNext()) {
 				int link = iterator.next();
@@ -335,12 +365,11 @@ public class Option {
 
 		if(!difference.isEmpty()) {
 			System.out.println("Deleting options: " + difference + " from category: " + categoryIndex + " in option from " + this);
-			lp.printBoard();
 			
-			for (int opt = 0; opt < lp.getOptionNum(); opt++) {
+			for (int opt = 0; opt < logic.getOptionNum(); opt++) {
 				if (difference.contains(opt)) {
 					try {
-						lp.getOption(categoryIndex, opt).declareMiss(this);
+						logic.getOption(categoryIndex, opt).declareMiss(this);
 					} catch (LogicException e) {
 						if (e.getCategory2Index() == -1)
 							e.addOption(categoryIndex, opt);
@@ -377,41 +406,41 @@ public class Option {
 				r = iterator.next();
 				if (!r.isActive(x)) continue;
 				
-				Option otherOption = lp.getOption(r.getCategoryIndex(!otherIsLesser), r.getOptionIndex(!otherIsLesser));
+				Option otherOption = logic.getOption(r.getCategoryIndex(!otherIsLesser), r.getOptionIndex(!otherIsLesser));
 				
 				if (otherOption.getLink(mainCategoryIndex) == -1) {
-					if(links[mainCategoryIndex] != -1) r.markInactive(x);
+					if(isLinked(mainCategoryIndex)) r.markInactive(x);
 					Set<Integer> includedPossibilities = new HashSet<Integer>();
 					if (r.isGreaterLessThan()) {
 						if (!otherIsLesser) {
 							int min = 0;
 							
-							if (links[mainCategoryIndex] == -1)
+							if (!isLinked(mainCategoryIndex))
 								while(!possibleLinks.get(mainCategoryIndex).contains(min)) {							
 									min++;
 								}
 							else
-								min = links[mainCategoryIndex];
+								min = links[mainCategoryIndex].get();
 							
-							for (int i = min+1; i < lp.getOptionNum(); i++) {
+							for (int i = min+1; i < logic.getOptionNum(); i++) {
 								includedPossibilities.add(i);
 							}
 						} else {
-							int max = lp.getOptionNum() - 1;
+							int max = logic.getOptionNum() - 1;
 							
-							if (links[mainCategoryIndex] == -1)
+							if (!isLinked(mainCategoryIndex))
 								while(!possibleLinks.get(mainCategoryIndex).contains(max)) {							
 									max--;
 								}
 							else 
-								max = links[mainCategoryIndex];
+								max = links[mainCategoryIndex].get();
 	
 							for (int i = 0; i < max; i++) {
 								includedPossibilities.add(i);
 							}
 						}
 					} else {
-						if (links[mainCategoryIndex] == -1) {
+						if (!isLinked(mainCategoryIndex)) {
 							for (int val : possibleLinks.get(mainCategoryIndex)) {
 								int possVal;
 								if (otherIsLesser)
@@ -421,7 +450,7 @@ public class Option {
 								
 		
 								
-								if (possVal >= 0 && possVal < lp.getOptionNum()) {
+								if (possVal >= 0 && possVal < logic.getOptionNum()) {
 									includedPossibilities.add(possVal);
 								}
 								
@@ -430,9 +459,9 @@ public class Option {
 						} else {
 							int possVal;
 							if (otherIsLesser)
-								possVal = links[mainCategoryIndex] - r.getDifference();
+								possVal = links[mainCategoryIndex].get() - r.getDifference();
 							else 
-								possVal = links[mainCategoryIndex] + r.getDifference();
+								possVal = links[mainCategoryIndex].get() + r.getDifference();
 							
 							includedPossibilities.add(possVal);
 						}
@@ -473,7 +502,7 @@ public class Option {
 			while(iteratorI.hasNext()) {
 				indices = iteratorI.next();
 				
-				if(links[indices[0]] == -1) {
+				if(!isLinked(indices[0])) {
 					if(!possibleLinks.get(indices[0]).contains(indices[1])) {
 						if(r.handle(indices[0], indices[1], false)) {
 							int[] result = r.getOnlyOption();
@@ -483,7 +512,7 @@ public class Option {
 						}
 					}
 				} else {
-					if(links[indices[0]] == indices[1]) {
+					if(links[indices[0]].get() == indices[1]) {
 						if(r.handle(indices[0], indices[1], true)) {
 							for(int[] misses : r.getRestrictedOptions()) {
 								declareMiss(misses[0], misses[1]);
@@ -533,7 +562,7 @@ public class Option {
 	public String toString() {
 		String result = "";
 		for (int i = 0; i < links.length; i++) {
-			if (links[i] == -1) result += possibleLinks.get(i);
+			if (!isLinked(i)) result += possibleLinks.get(i);
 			else result += links[i];
 			result += "--";
 		}

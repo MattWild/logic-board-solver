@@ -4,7 +4,7 @@ import java.util.Set;
 
 import exceptions.SetupException;
 import exceptions.LogicException;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
 import objects.Option;
 import rules.RuleManager;
 
@@ -17,7 +17,7 @@ import rules.RuleManager;
  */
 
 public class Solver {
-	LogicPuzzle lp;
+	PuzzleLogic lp;
 	RuleManager rm;
 	Set<Option> optionTracker;
 	
@@ -27,7 +27,7 @@ public class Solver {
 	 * @param rm
 	 */
 	
-	public Solver(LogicPuzzle lp, RuleManager rm) {
+	public Solver(PuzzleLogic lp, RuleManager rm) {
 		this.lp = lp;
 		this.rm = rm;
 		optionTracker = new HashSet<Option>();

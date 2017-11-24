@@ -58,11 +58,16 @@ public class AddRelationController {
 	}
 	
 	private class mainCategorySelectListener implements ChangeListener<Number> {
-
+		final ChoiceBox<String> cb;
+	
+		public mainCategorySelectListener(ChoiceBox<String> cb) {
+	        this.cb = cb;
+	    }
+		
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 			ObservableList<String> newOptionValues;
-			newOptionValues = mainApp.generateDifferenceOptions(newValue.intValue());
+			newOptionValues = mainApp.generateDifferenceOptions(mainApp.getCategoryIndex(cb.getItems().get(newValue.intValue())));
 			newOptionValues.add(0, "N/A");
 			valueBox.setItems(newOptionValues);
 		}
@@ -86,12 +91,11 @@ public class AddRelationController {
 		
 		greaterCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new categorySelectListener(greaterCategoryBox));
 		lesserCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new categorySelectListener(lesserCategoryBox));
-		mainCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new mainCategorySelectListener());
+		mainCategoryBox.getSelectionModel().selectedIndexProperty().addListener(new mainCategorySelectListener(mainCategoryBox));
 		
 		ArrayList<String> tempValue = new ArrayList<String>();
 		greaterOptionBox.setItems(FXCollections.observableArrayList(tempValue));
 		lesserOptionBox.setItems(FXCollections.observableArrayList(tempValue));
-
 	}
 
 	public void setDialogStage(Stage dialogStage) {

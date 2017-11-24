@@ -3,7 +3,7 @@ package solver;
 import java.util.Scanner;
 
 import exceptions.SetupException;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
 import rules.DeclarationRule;
 import rules.DoubleRestrictionRule;
 import rules.RelationRule;
@@ -14,7 +14,7 @@ import solver.Solver;
 
 public class ManualLogicSolver {
 	
-	private static LogicPuzzle lp;
+	private static PuzzleLogic lp;
 	private static RuleManager rm;
 	private static Solver solver;
 	private static Scanner in;
@@ -175,7 +175,7 @@ public class ManualLogicSolver {
 		while(true) {
 			askAndGetAnswer("Enter the category name of the first target option:");
 			try {
-				catTemp = lp.getCategoryFromName(response);
+				catTemp = lp.getCategoryIndex(response);
 				break;
 			} catch (SetupException e) {
 				System.out.println("No such category. Re-enter.");
@@ -195,7 +195,7 @@ public class ManualLogicSolver {
 		while(true) {
 			askAndGetAnswer("Enter the category name of the second target option:");
 			try {
-				catTemp = lp.getCategoryFromName(response);
+				catTemp = lp.getCategoryIndex(response);
 				break;
 			} catch (SetupException e) {
 				System.out.println("No such category. Re-enter.");
@@ -379,7 +379,7 @@ public class ManualLogicSolver {
 			}
 		}
 		
-		lp = new LogicPuzzle(categories, options);
+		lp = new PuzzleLogic(categories, options);
 	}
 
 	private static String setupNumericCategory(String categoryName, int categoryIndex, int optionNum, String[][] options) {

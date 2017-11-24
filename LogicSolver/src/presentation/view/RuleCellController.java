@@ -12,8 +12,8 @@ public class RuleCellController {
 	@FXML
 	private Label ruleLabel;
 	
-	public void setRuleString(Rule rule) {
-		this.ruleLabel.setText(rule.buildRuleString());
+	public void setRuleString(String ruleString) {
+		this.ruleLabel.setText(ruleString);
 	}
 	
 	public HBox getBox() {

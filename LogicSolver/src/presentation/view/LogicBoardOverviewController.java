@@ -3,14 +3,18 @@ package presentation.view;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,6 +47,16 @@ public class LogicBoardOverviewController {
 	    private void handleAddRuleButton() {
 	    	mainApp.showAddRuleDialog();
 	    }
+	    
+	    @FXML
+	    private void handleSubmitRules() {
+	    	mainApp.applyRules();
+	    }
+	    
+	    @FXML
+	    private void handleSolve() {
+	    	mainApp.deepSolve();
+	    }
 	
 	 // Reference to the main application.
 	    private MainApp mainApp;
@@ -53,6 +67,7 @@ public class LogicBoardOverviewController {
 	        LogicRectangle(double w, double h, int i, int j, int k, int l) {
 	            super(w, h);
 	            state = new SimpleIntegerProperty(1);
+	            fill();
 	            
 	            state.addListener(new ChangeListener<Number>() {
 					@Override
@@ -126,7 +141,7 @@ public class LogicBoardOverviewController {
 	            super.updateItem(rule,empty);
 	            if(rule != null)
 	            {
-	            	controller.setRuleString(rule);
+	            	controller.setRuleString(rule.buildRuleString(mainApp));
 	                setGraphic(controller.getBox());
 	            }
 	        }
@@ -187,8 +202,8 @@ public class LogicBoardOverviewController {
 		private void setupOptionLabels(int numCategories, int numOpts) {
 	        for (int i = 0; i < numCategories; i++) {
 	        	for (int j = 0; j < numOpts; j++) {
-		        	Label horizCat = new Label(mainApp.getOption(i,j));
-		        	Label vertCat = new Label(mainApp.getOption(numCategories - i, j));
+		        	Label horizCat = new Label(mainApp.getOptionName(numCategories - i,j));
+		        	Label vertCat = new Label(mainApp.getOptionName(i, j));
 		        	horizCat.setRotate(-90);
 		        	
 		        	horizCat.setTextAlignment(TextAlignment.CENTER);
@@ -208,8 +223,8 @@ public class LogicBoardOverviewController {
 		private void setupCategoryLabels(int numCategories, int numOpts) {
 	        
 	        for (int i = 0; i < numCategories; i++) {
-	        	Label horizCat = new Label(mainApp.getCategory(i));
-	        	Label vertCat = new Label(mainApp.getCategory(numCategories - i));
+	        	Label horizCat = new Label(mainApp.getCategoryName(numCategories - i));
+	        	Label vertCat = new Label(mainApp.getCategoryName(i));
 	        	vertCat.setRotate(-90);
 	        	
 	        	horizCat.setTextAlignment(TextAlignment.CENTER);
@@ -230,7 +245,8 @@ public class LogicBoardOverviewController {
 	        	for (int j = 0; j < numCategories - i; j++) {
 	        		for(int k = 0; k < numOpts; k++) {
 	        			for (int l = 0; l < numOpts; l++) {
-	        				LogicRectangle rectangle = new LogicRectangle(BOX_SIZE, BOX_SIZE, i, j, k, l);
+	        				LogicRectangle rectangle = new LogicRectangle(BOX_SIZE, BOX_SIZE, i, j, k, l); 
+	        				rectangle.state().bind(mainApp.boardPosition(i,k,j,l));
 				            boardPane.add(rectangle, 2 + i*numOpts + k, 2 + j*numOpts + l);
 				            
 				            GridPane.setHalignment(rectangle, HPos.CENTER);

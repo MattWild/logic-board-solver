@@ -1,9 +1,10 @@
 package rules;
 import exceptions.LogicException;
 import exceptions.SetupException;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
 import objects.Option;
 import objects.Relation;
+import presentation.MainApp;
 
 /**
  * This class defines a relation rule, one that relates the values
@@ -15,8 +16,6 @@ import objects.Relation;
  */
 
 public class RelationRule implements Rule {
-	
-	private LogicPuzzle lp;
 	private int mainCategory;
 	private int category1;
 	private int category2;
@@ -31,47 +30,48 @@ public class RelationRule implements Rule {
 	 * @throws SetupException 
 	 */
 
-	public RelationRule(LogicPuzzle lp, String string) throws SetupException {
+	/*public RelationRule(PuzzleLogic lp, String string) throws SetupException {
 		String[] x = string.split(" ");
 		
-		mainCategory = lp.getCategoryFromName(x[0]);
-		category1 = lp.getCategoryFromName(x[1]);
-		category2 = lp.getCategoryFromName(x[2]);
+		mainCategory = lp.getCategoryIndex(x[0]);
+		category1 = lp.getCategoryIndex(x[1]);
+		category2 = lp.getCategoryIndex(x[2]);
 		option1 = lp.getOptionFromName(category1, x[3]);
 		option2 = lp.getOptionFromName(category2, x[4]);
 		difference = Integer.parseInt(x[5]);
+	}*/
+
+	
+	public RelationRule() {
+		
 	}
 
-	public RelationRule(LogicPuzzle lp) {
-		this.lp = lp;
-	}
-
-	public void setMainCategory(String mainCategory) throws SetupException {
-		this.mainCategory = lp.getCategoryFromName(mainCategory);
-	}
-
-
-
-	public void setCategory1(String category1) throws SetupException {
-		this.category1 = lp.getCategoryFromName(category1);
+	public void setMainCategory(int mainCategory) {
+		this.mainCategory = mainCategory;
 	}
 
 
 
-	public void setCategory2(String category2) throws SetupException {
-		this.category2 = lp.getCategoryFromName(category2);
+	public void setCategory1(int category1) {
+		this.category1 = category1;
 	}
 
 
 
-	public void setOption1(String option1) throws SetupException {
-		this.option1 = lp.getOptionFromName(category1, option1);
+	public void setCategory2(int category2) {
+		this.category2 = category2;
 	}
 
 
 
-	public void setOption2(String option2) throws SetupException {
-		this.option2 = lp.getOptionFromName(category2, option2);
+	public void setOption1(int option1) {
+		this.option1 = option1;
+	}
+
+
+
+	public void setOption2(int option2) {
+		this.option2 = option2;
 	}
 
 
@@ -83,41 +83,22 @@ public class RelationRule implements Rule {
 
 
 	@Override
-	public void apply() throws LogicException, SetupException {
-		Option opt1 = lp.getOption(category1, option1);
-		Option opt2 = lp.getOption(category2, option2);
-		
-		Relation r;
-		if (difference == 0) {
-			r = new Relation(mainCategory, category1, option1, category2, option2, -1, true);
-		} else {
-			int[] param = lp.getCategoryParams(mainCategory);	
-			r = new Relation(mainCategory, category1, option1, category2, option2, difference / param[1], false);
-		}
-		
-		opt1.declareMiss(category2, option2);
-		opt2.declareMiss(category1, option1);
-		
-		opt1.addRelation(r, false);
-		opt2.addRelation(r, true);
+	public void apply(PuzzleLogic logic) throws LogicException, SetupException {
+		logic.setupRelation(mainCategory, category1, option1, category2, option2, difference);
 	}
 
 	@Override
-	public String buildRuleString() {
+	public String buildRuleString(MainApp mainApp) {
 		String str = "";
 		
-		try {
-			str += "In " + lp.getCategoryName(mainCategory) + ", ";
-			str += lp.getOptionName(category2,option2) + " from " + lp.getCategoryName(category2);
-			str += " is greater than ";
-			str += lp.getOptionName(category1,option1) + " from " + lp.getCategoryName(category1);
-			if (difference != 0) {
-				str += " by " + difference + " units";
-			}
-		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		str += "In " + mainApp.getCategoryName(mainCategory) + ", ";
+		str += mainApp.getOptionName(category2,option2) + " from " + mainApp.getCategoryName(category2);
+		str += " is greater than ";
+		str += mainApp.getOptionName(category1,option1) + " from " + mainApp.getCategoryName(category1);
+		if (difference != 0) {
+			str += " by " + difference + " units";
 		}
+		
 		return str;
 	}
 

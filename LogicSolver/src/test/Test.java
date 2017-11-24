@@ -1,7 +1,7 @@
 package test;
 
 import exceptions.SetupException;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
 import rules.RuleManager;
 import solver.Solver;
 
@@ -107,7 +107,7 @@ public abstract class Test {
 		
 		System.out.println("TEST: " + title + "\n");
 		
-		LogicPuzzle lp = new LogicPuzzle(categories, options);
+		PuzzleLogic lp = new PuzzleLogic(categories, options);
 		RuleManager rm = null;
 		try {
 			rm = new RuleManager(rules, lp);

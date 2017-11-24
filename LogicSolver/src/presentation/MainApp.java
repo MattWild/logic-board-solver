@@ -2,13 +2,25 @@ package presentation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import exceptions.LogicException;
 import exceptions.SetupException;
+import javafx.animation.Animation;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -16,7 +28,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import objects.LogicPuzzle;
+import javafx.util.Duration;
+import objects.Option;
+import objects.OptionIndex;
+import objects.PuzzleLogic;
 import presentation.view.AddDeclarationController;
 import presentation.view.AddDoubleRestrictionController;
 import presentation.view.AddRelationController;
@@ -31,30 +46,66 @@ import rules.DoubleRestrictionRule;
 import rules.RelationRule;
 import rules.RestrictionRule;
 import rules.Rule;
+import rules.RuleFactory;
 import rules.RuleManager;
 
 public class MainApp extends Application {
 
 	private Stage primaryStage;
     private BorderPane rootLayout;
-    private LogicPuzzle lp;
-    private RuleManager rm;
-    private String[] categories;
-    private String[][] options;
+    private PuzzleLogic logic;
+    private RuleFactory ruleFactory;
 	private ObservableList<String> categoryNames;
 	private ObservableList<ObservableList<String>> optionNames;
+	private ObservableMap<OptionIndex, Option> options;
+	private ObservableMap<OptionIndex, ObservableMap<OptionIndex, ReadOnlyIntegerWrapper>> board;
 	private ObservableList<Rule> rules;
+	private ObservableMap<Integer, int[]> categoryParams;
 	private final IntegerProperty categoryNumber;
 	private final IntegerProperty optionNumber;
 	private int categoryCount;
-
+	private ObservableList<Task<Void>> tasks;
 	
 	public MainApp() {
 		categoryNumber = new SimpleIntegerProperty();
 		optionNumber = new SimpleIntegerProperty();
 		categoryNames = FXCollections.observableArrayList();
-		this.optionNames = FXCollections.observableArrayList();
+		optionNames = FXCollections.observableArrayList();
 		rules = FXCollections.observableArrayList();
+		categoryParams = FXCollections.observableHashMap();
+		options = FXCollections.observableHashMap();
+		board = FXCollections.observableHashMap();
+		tasks = FXCollections.observableArrayList();
+		
+		tasks.addListener(new ListChangeListener<Task<Void>>() {
+
+			@Override
+			public void onChanged(Change<? extends Task<Void>> c) {
+				while (c.next()) {
+					if (c.wasAdded() && c.getList().size() == 1) {
+				    	PauseTransition pause = new PauseTransition();
+				    	pause.setDuration(Duration.millis(100));
+				    	pause.setOnFinished(event -> {
+							c.getList().get(0).run();
+							c.getList().remove(0);
+				    	});
+				    	pause.play();
+					} else if (c.wasRemoved() && c.getList().size() != 0) {
+				    	PauseTransition pause = new PauseTransition();
+				    	pause.setDuration(Duration.millis(100));
+				    	pause.setOnFinished(event -> {
+							c.getList().get(0).run();
+							c.getList().remove(0);
+				    	});
+				    	pause.play();
+					} 
+				}
+			}
+			
+		});
+
+		logic = new PuzzleLogic(this);
+		ruleFactory = new RuleFactory(this);
 	}
 	
 	public Stage getPrimaryStage() {
@@ -69,20 +120,46 @@ public class MainApp extends Application {
 		return optionNumber.get();
 	}
 	
-	public String getCategory(int i) {
+	public String getCategoryName(int i) {
 		return categoryNames.get(i);
 	}
 	
-	public String getOption(int i, int j) {
+	public int getCategoryIndex(String categoryName) {
+		for(int index = 0; index < getCategoryNumber(); index++) {
+			if(categoryNames.get(index).compareTo(categoryName) == 0) {
+				return index;
+			}
+		}
+		return -1;
+	}
+	
+	public Option getOption(int i, int j) {
+		return options.get(new OptionIndex(i,j));
+	}
+	
+	public String getOptionName(int i, int j) {
 		return optionNames.get(i).get(j);
 	}
 	
-	public LogicPuzzle getLogicPuzzle() {
-		return lp;
+	public int getOptionIndex(int catToRestrict, String optToRestrictName) {
+		for(int index = 0; index < getOptionNumber(); index++) {
+			if(optionNames.get(catToRestrict).get(index).compareTo(optToRestrictName) == 0) {
+				return index;
+			}
+		}
+		return -1;
+	}
+	
+	public PuzzleLogic getLogicPuzzle() {
+		return logic;
 	}
 	
 	public ObservableList<String> getCategories() {
 		return categoryNames;
+	}
+
+	public int[] getCategoryParams(int mainCategory) {
+		return categoryParams.get(mainCategory);
 	}
 
 	public ObservableList<Rule> getRules() {
@@ -95,6 +172,67 @@ public class MainApp extends Application {
 
 	public ObservableList<String> getOptionsFromCategory(int index) {
 		return optionNames.get(index);
+	}
+	
+	public ReadOnlyIntegerProperty boardPosition(int i, int k, int j, int l) {
+		return board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).getReadOnlyProperty();
+	}
+	
+	public void showHit(int cat1, int opt1, int cat2, int opt2) {
+		int i,j,k,l;
+		if(cat1 < cat2) {
+			i = getCategoryNumber() - 1 - cat2;
+			k = opt2;
+			j = cat1;
+			l = opt1;
+		} else {
+			i = getCategoryNumber() - 1 - cat1;
+			k = opt1;
+			j = cat2;
+			l = opt2;
+		}
+		
+		System.out.println(cat1 + " " + cat2);
+		System.out.println(i + " " + k + " " + j + " " + l);
+		
+		Task<Void> task = new Task<Void>() {
+		    @Override
+		    protected Void call() throws Exception {
+		    	board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(2);
+		    	return null;    
+		    }
+		};
+		
+		tasks.add(task);
+		//board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(2);
+	}
+
+	public void showMiss(int cat1, int opt1, int cat2, int opt2) {
+		int i,j,k,l;
+		if(cat1 < cat2) {
+			i = getCategoryNumber() - 1 - cat2;
+			k = opt2;
+			j = cat1;
+			l = opt1;
+		} else {
+			i = getCategoryNumber() - 1 - cat1;
+			k = opt1;
+			j = cat2;
+			l = opt2;
+		}
+		System.out.println(cat1 + " " + cat2);
+		System.out.println(i + " " + k + " " + j + " " + l);
+		
+		Task<Void> task = new Task<Void>() {
+		    @Override
+		    protected Void call() throws Exception {
+		    	board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(0);
+		    	return null;    
+		    }
+		};
+		
+		tasks.add(task);
+		//board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(0);
 	}
 	
 	public static void main(String[] args) {
@@ -181,37 +319,39 @@ public class MainApp extends Application {
 	public void setupCategoriesOptions(int categoryNumber, int optionNumber) {
 		this.categoryNumber.set(categoryNumber);
 		this.optionNumber.set(optionNumber);
+		setupBoard();
+		setupOptions();
 		categoryCount = 0;
-		
-		categories = new String[categoryNumber];
-		options = new String[categoryNumber][];
 		
 		showCategoryOptionInput();
 	}
 
+	private void setupBoard() {
+		for (int i = 0; i < getCategoryNumber() - 1; i++) 
+			for(int k = 0; k < getOptionNumber(); k++) {
+        		ObservableMap<OptionIndex, ReadOnlyIntegerWrapper> subBoard = FXCollections.observableHashMap();
+				for (int j = 0; j < getCategoryNumber() - 1 - i; j++)
+        			for (int l = 0; l < getOptionNumber(); l++)
+        				subBoard.put(new OptionIndex(j,l), new ReadOnlyIntegerWrapper(1));
+				board.put(new OptionIndex(i,k), subBoard);
+			}
+	}
+
+	private void setupOptions() {
+		for (int i = 0; i < getCategoryNumber(); i++) 
+			for(int j = 0; j < getOptionNumber(); j++) 
+				options.put(new OptionIndex(i,j), logic.newOption(i,j));
+	}
+
 	public void checkReady(String categoryName, String[] optionNames) {
-		categories[categoryCount] = categoryName;
-		options[categoryCount] = optionNames;
+		categoryNames.add(categoryName);
+		this.optionNames.add(FXCollections.observableArrayList(optionNames));
 		
 		categoryCount++;
 		
 		if (categoryCount < categoryNumber.get()) {
 			showCategoryOptionInput();
 		} else {
-			lp = new LogicPuzzle(categories, options);
-			
-			for (int i = 0; i < categories.length; i++) {
-				categoryNames.add(categories[i]);
-			
-				ObservableList<String> sublist = FXCollections.observableArrayList();
-				for (String option : options[i]) {
-					sublist.add(option);
-				}
-				this.optionNames.add(sublist);
-			}
-			
-			rm = new RuleManager(lp);
-			
 			showLogicBoardOverview();
 		}
 	}
@@ -248,10 +388,10 @@ public class MainApp extends Application {
 
 	public void setupNumericOption(String categoryName) {
 		int[] parameters = showNumericOptionDialog();
-		if (options != null) {
-			categoryName += " " + parameters[0] + " " + parameters[1];
+		if (parameters != null) {
 			String[] options = new String[optionNumber.get()];
 			
+			categoryParams.put(categoryCount, parameters);
 			for (int i = 0; i < optionNumber.get(); i++) {
 				options[i] = Integer.toString(parameters[0] + (parameters[1] * i));
 			}
@@ -378,22 +518,13 @@ public class MainApp extends Application {
 	public boolean createDeclarationRule(String cat1Name, String cat2Name, String opt1Name,
 			String opt2Name, String hitmissString) {
 		
-		try {
-			DeclarationRule rule = new DeclarationRule(lp);
-			rule.setCategory1(cat1Name);
-			rule.setCategory2(cat2Name);
-			rule.setOption1(opt1Name);
-			rule.setOption2(opt2Name);
-			if (hitmissString.compareTo("is") == 0) {
-				rule.setValue(1);
-			} else {
-				rule.setValue(-1);
-			}
-			
+		Rule rule = ruleFactory.createDeclarationRule(cat1Name, 
+				cat2Name, opt1Name, opt2Name, hitmissString);
+		
+		if(rule != null) {
 			rules.add(rule);
-			
 			return true;
-		} catch (SetupException e) {
+		} else {
 			return false;
 		}
 	}
@@ -401,17 +532,13 @@ public class MainApp extends Application {
 	public boolean createRestrictionRule(String catToRestrictName, String optToRestrictName, String targetCat1Name,
 			String targetCat2Name, String targetOpt1Name, String targetOpt2Name) {
 		
-		try {
-			RestrictionRule rule = new RestrictionRule(lp);
-			rule.setCategoryToRestrict(catToRestrictName);
-			rule.setOptionToRestrict(optToRestrictName);
-			rule.addTargetOption(lp.getCategoryFromName(targetCat1Name), targetOpt1Name);
-			rule.addTargetOption(lp.getCategoryFromName(targetCat2Name), targetOpt2Name);
+		Rule rule = ruleFactory.createRestrictionRule(catToRestrictName, optToRestrictName, 
+				targetCat1Name, targetCat2Name, targetOpt1Name, targetOpt2Name);
 			
+		if(rule != null) {
 			rules.add(rule);
-			
 			return true;
-		} catch (SetupException e) {
+		} else {
 			return false;
 		}
 	}
@@ -419,40 +546,27 @@ public class MainApp extends Application {
 	public boolean createDoubleRestrictionRule(String category00Name, String category01Name, String category10Name,
 			String category11Name, String option00Name, String option01Name, String option10Name,
 			String option11Name) {
-		
-		DoubleRestrictionRule rule = new DoubleRestrictionRule(lp);
-		rule.setFirstCategoryInFirstPair(category00Name);
-		rule.setSecondCategoryInFirstPair(category01Name);
-		rule.setFirstCategoryInSecondPair(category10Name);
-		rule.setSecondCategoryInSecondPair(category11Name);
-		rule.setFirstOptionInFirstPair(option00Name);
-		rule.setSecondOptionInFirstPair(option01Name);
-		rule.setFirstOptionInSecondPair(option10Name);
-		rule.setSecondOptionInSecondPair(option11Name);
-		
-		rules.add(rule);
-		
-		return true;
+
+		Rule rule = ruleFactory.createDoubleRestrictionRule(category00Name, category01Name, 
+				category10Name, category11Name, option00Name, option01Name, option10Name, option11Name);
+			
+		if(rule != null) {
+			rules.add(rule);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean createRelationRule(String mainCategoryName, String greaterCategoryName, String greaterOptionName,
 			String lesserCategoryName, String lesserOptionName, String valueString) {
-		RelationRule rule = new RelationRule(lp);
-		try {
-			rule.setCategory1(lesserCategoryName);
-			rule.setCategory2(greaterCategoryName);
-			rule.setOption1(lesserOptionName);
-			rule.setOption2(greaterOptionName);
-			rule.setMainCategory(mainCategoryName);
-			if (valueString.compareTo("N/A") == 0) {
-				rule.setDifference(0);
-			} else {
-				rule.setDifference(Integer.parseInt(valueString));
-			}
-			rules.add(rule);
+		Rule rule = ruleFactory.createRelationRule(mainCategoryName, greaterCategoryName, greaterOptionName,
+				lesserCategoryName, lesserOptionName, valueString);
 			
+		if(rule != null) {
+			rules.add(rule);
 			return true;
-		} catch (SetupException e) {
+		} else {
 			return false;
 		}
 	}
@@ -460,12 +574,8 @@ public class MainApp extends Application {
 	public ObservableList<String> generateDifferenceOptions(int categoryIndex) {
 		ArrayList<String> differenceOptions = new ArrayList<String>();
 		int difference = -1;
-		try {
-			difference = lp.getCategoryParams(categoryIndex)[1];
-		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		System.out.println(categoryIndex);
+		difference = categoryParams.get(categoryIndex)[1];
 		for (int i = 1; i < optionNumber.get(); i++) {
 			differenceOptions.add(Integer.toString(i * difference));
 		}
@@ -475,14 +585,113 @@ public class MainApp extends Application {
 	public ObservableList<String> getNumericCategories() {
 		ObservableList<String> list = FXCollections.observableArrayList();
 		
-		for (String categoryName : categoryNames)
-			try {
-				lp.getCategoryParams(lp.getCategoryFromName(categoryName));
-				list.add(categoryName);
-			} catch (SetupException e) {
-				
-			}
+		for (Integer categoryIndex : categoryParams.keySet())
+			list.add(categoryNames.get(categoryIndex));
 		
 		return list;
+	}
+	
+	public void applyRules() {
+		for (Rule r : rules) {
+			if (r == null) continue;
+				logic.applyRule(r);
+		}
+		clearRules();
+	}
+
+	public void clearRules() {
+		rules.clear();
+	}
+
+	public void setOption(int i, int j, Option option) {
+		options.put(new OptionIndex(i,j), option);
+	}
+	
+	public void printBoard() {
+		String str = "";
+		
+		str += "+";
+		for(int i = 0; i < categoryNames.size() - 1; i++) {
+			for (int j = 0; j < getOptionNumber(); j++) {
+				str += "-";
+			}
+			str += "+";
+		}
+		str += "\n";
+		
+		for (int cat1 = 0; cat1 < categoryNames.size() - 1; cat1++) {
+			for (int opt1 = 0; opt1 < getOptionNumber(); opt1++) {				
+				Option option1 = options.get(new OptionIndex(cat1, opt1));
+				for(int cat2 = categoryNames.size() - 1; cat2 > cat1; cat2--) {
+					str += "|";
+					if (option1.getLink(cat2) != -1) {
+						for (int opt2 = 0; opt2 < getOptionNumber(); opt2++) {
+							if (option1.getLink(cat2) == opt2) 
+								str += "O";
+							else
+								str += "X";
+						}
+					} else {
+						Set<Integer> possibilities = option1.getPossibilities(cat2);
+						
+						for (int opt2 = 0; opt2 < getOptionNumber(); opt2++) {
+							if (possibilities.contains(opt2)) 
+								str += " ";
+							else
+								str += "X";
+						}
+					}
+				}
+				
+				
+				str += "|\n";
+			}
+			
+			str += "+";
+			for(int i = 0; i < categoryNames.size() - cat1 - 1; i++) {
+				for (int j = 0; j < getOptionNumber(); j++) {
+					str += "-";
+				}
+				str += "+";
+			}
+			str += "\n";
+		}
+		
+		System.out.println(str);
+	}
+	
+	public void deepSolve() {
+		checkCondensers();
+		checkRestrictions();
+	}
+	
+	private void checkRestrictions(){
+		Set<Option> checkedOptions = new HashSet<Option>();
+		
+		for (int cat = 0; cat < getCategoryNumber(); cat++)
+			for (int opt = 0; opt < getOptionNumber(); opt++) {
+				Option option = getOption(cat, opt);
+				if (!checkedOptions.contains(option)) {
+					logic.condenseByRestrictions(option);
+					checkedOptions.add(option);
+				}
+			}	
+	}
+
+	private void checkCondensers(){
+		Set<Option> checkedOptions = new HashSet<Option>();
+		
+		for (int i = 2; i < getOptionNumber() - 1; i++) {
+			for (int cat = 0; cat < getCategoryNumber(); cat++)
+				for (int opt = 0; opt < getOptionNumber(); opt++) {
+					Option option = getOption(cat, opt);
+					if (!checkedOptions.contains(option)) {
+						logic.condenseByFilter(option, i);
+						checkedOptions.add(option);
+					}
+				}
+			
+			checkedOptions.clear();
+		}
 	}
 }

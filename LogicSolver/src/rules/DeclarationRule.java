@@ -1,7 +1,8 @@
 package rules;
 import exceptions.SetupException;
 import exceptions.LogicException;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
+import presentation.MainApp;
 
 /**
  * This class defines a declaration rule, one that defines the 
@@ -13,15 +14,14 @@ import objects.LogicPuzzle;
 
 public class DeclarationRule implements Rule {
 	
-	private LogicPuzzle lp;
 	private int category1;
 	private int category2;
 	private int option1;
 	private int option2;
 	private int value;
 	
-	public DeclarationRule(LogicPuzzle lp) {
-		this.lp = lp;
+	public DeclarationRule() {
+		
 	}
 	
 	/**
@@ -31,32 +31,32 @@ public class DeclarationRule implements Rule {
 	 * @throws SetupException 
 	 */
 	
-	public DeclarationRule(LogicPuzzle lp, String string) throws SetupException {
+	/*public DeclarationRule(PuzzleLogic lp, String string) throws SetupException {
 		this(lp);
 		String[] x = string.split(" ");
 		
-		category1 = this.lp.getCategoryFromName(x[0]);
-		category2 = this.lp.getCategoryFromName(x[1]);
+		category1 = this.lp.getCategoryIndex(x[0]);
+		category2 = this.lp.getCategoryIndex(x[1]);
 		option1 = this.lp.getOptionFromName(category1, x[2]);
 		option2 = this.lp.getOptionFromName(category2, x[3]);
 		value = Integer.parseInt(x[4]);
-	}
+	}*/
 	
 
-	public void setCategory1(String category1) throws SetupException {
-		this.category1 = lp.getCategoryFromName(category1);
+	public void setCategory1(int category1) {
+		this.category1 = category1;
 	}
 
-	public void setCategory2(String category2) throws SetupException {
-		this.category2 = lp.getCategoryFromName(category2);
+	public void setCategory2(int category2) {
+		this.category2 = category2;
 	}
 
-	public void setOption1(String option1) throws SetupException {
-		this.option1 = lp.getOptionFromName(category1, option1);
+	public void setOption1(int option1) {
+		this.option1 = option1;
 	}
 
-	public void setOption2(String option2) throws SetupException {
-		this.option2 = lp.getOptionFromName(category2, option2);
+	public void setOption2(int option2) {
+		this.option2 = option2;
 	}
 
 	public void setValue(int value) {
@@ -65,35 +65,25 @@ public class DeclarationRule implements Rule {
 
 
 	@Override
-	public void apply() throws LogicException, SetupException {
-		try {
-			if (value == -1) {
-				lp.getOption(category1, option1).declareMiss(category2, option2);
-				lp.getOption(category2, option2).declareMiss(category1, option1);
-			} else {
-				lp.getOption(category1, option1).declareLink(category2, option2);
-			}
-		} catch (LogicException e) {
-			e.addOption(category1, option1);
-			throw e;
+	public void apply(PuzzleLogic logic) throws LogicException, SetupException {
+		if (value == -1) {
+			logic.declareMiss(category1, option1, category2, option2);
+		} else {
+			logic.declareLink(category1, option1, category2, option2);
 		}
 	}
 
 	@Override
-	public String buildRuleString() {
+	public String buildRuleString(MainApp mainApp) {
 		String str = "";
-		
-		try {
-			str += lp.getOptionName(category1, option1) + " from " + lp.getCategoryName(category1);
-			if (value == -1) 
-				str += " is not ";
-			else 
-				str += " is ";
-			str += lp.getOptionName(category2, option2) + " from " + lp.getCategoryName(category2);
-		} catch (SetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		str += mainApp.getOptionName(category1, option1) + " from " + mainApp.getCategoryName(category1);
+		if (value == -1) 
+			str += " is not ";
+		else 
+			str += " is ";
+		str += mainApp.getOptionName(category2, option2) + " from " + mainApp.getCategoryName(category2);
+
 		System.out.println(str);
 		
 		return str;

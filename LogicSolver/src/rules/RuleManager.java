@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import exceptions.LogicException;
 import exceptions.SetupException;
 import javafx.collections.ObservableList;
-import objects.LogicPuzzle;
+import objects.PuzzleLogic;
 
 /**
  * This class parses a list of rules as strings and stores them
@@ -16,17 +16,17 @@ import objects.LogicPuzzle;
 public class RuleManager {
 	
 	private ArrayList<Rule> rules;
-	private LogicPuzzle lp;
+	private PuzzleLogic lp;
 	
-	public RuleManager(LogicPuzzle lp) {
+	public RuleManager(PuzzleLogic lp) {
 		this.lp = lp;
 		rules = new ArrayList<Rule>();
 	}
 	
-	public RuleManager(String[] ruleList, LogicPuzzle lp) throws SetupException {
+	public RuleManager(String[] ruleList, PuzzleLogic lp) throws SetupException {
 		this(lp);
-		for (String rule : ruleList) 
-			 addRule(rule);
+		//for (String rule : ruleList) 
+			 //addRule(rule);
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class RuleManager {
 	 * @throws SetupException 
 	 */
 	
-	public void addRule(String ruleString) throws SetupException {
+	/*public void addRule(String ruleString) throws SetupException {
 		int type = Integer.parseInt(ruleString.substring(0,1));
 		Rule rule = null;
 		
@@ -59,7 +59,7 @@ public class RuleManager {
 		}
 		
 		rules.add(rule);
-	}
+	}*/
 	
 	public void addRule(Rule rule) {
 		rules.add(rule);
@@ -72,10 +72,10 @@ public class RuleManager {
 	 * @throws SetupException
 	 */
 
-	public void applyRulesTo(LogicPuzzle lp) throws LogicException, SetupException {
+	public void applyRulesTo(PuzzleLogic lp) throws LogicException, SetupException {
 		for (Rule r : rules) {
 			if (r == null) continue;
-			r.apply();
+			//r.apply();
 			lp.printBoard();
 		}
 	}
