@@ -3,14 +3,9 @@ package presentation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import exceptions.LogicException;
-import exceptions.SetupException;
-import javafx.animation.Animation;
 import javafx.animation.PauseTransition;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -38,45 +33,48 @@ import presentation.view.AddRelationController;
 import presentation.view.AddRestrictionController;
 import presentation.view.AddRuleDialogController;
 import presentation.view.CategoryOptionInputController;
-import presentation.view.LogicBoardOverviewController;
+import presentation.view.LogicPuzzleSummaryController;
 import presentation.view.NumericOptionDialogController;
 import presentation.view.SetUpScreenController;
-import rules.DeclarationRule;
-import rules.DoubleRestrictionRule;
-import rules.RelationRule;
-import rules.RestrictionRule;
 import rules.Rule;
 import rules.RuleFactory;
-import rules.RuleManager;
 
 public class MainApp extends Application {
 
-	private Stage primaryStage;
-    private BorderPane rootLayout;
+
     private PuzzleLogic logic;
     private RuleFactory ruleFactory;
+    
+	private final IntegerProperty categoryNumber;
+	private final IntegerProperty optionNumber;
 	private ObservableList<String> categoryNames;
-	private ObservableList<ObservableList<String>> optionNames;
+	private ObservableMap<Integer, int[]> categoryParams;
+    private ObservableList<ObservableList<String>> optionNames;
 	private ObservableMap<OptionIndex, Option> options;
 	private ObservableMap<OptionIndex, ObservableMap<OptionIndex, ReadOnlyIntegerWrapper>> board;
 	private ObservableList<Rule> rules;
-	private ObservableMap<Integer, int[]> categoryParams;
-	private final IntegerProperty categoryNumber;
-	private final IntegerProperty optionNumber;
-	private int categoryCount;
+	
+	private Stage primaryStage;
+    private BorderPane rootLayout;
 	private ObservableList<Task<Void>> tasks;
 	
+	private int categoryCount;
+	
 	public MainApp() {
+		logic = new PuzzleLogic(this);
+		ruleFactory = new RuleFactory(this);
+		
 		categoryNumber = new SimpleIntegerProperty();
 		optionNumber = new SimpleIntegerProperty();
+		
 		categoryNames = FXCollections.observableArrayList();
-		optionNames = FXCollections.observableArrayList();
-		rules = FXCollections.observableArrayList();
 		categoryParams = FXCollections.observableHashMap();
+		optionNames = FXCollections.observableArrayList();
 		options = FXCollections.observableHashMap();
 		board = FXCollections.observableHashMap();
-		tasks = FXCollections.observableArrayList();
+		rules = FXCollections.observableArrayList();
 		
+		tasks = FXCollections.observableArrayList();
 		tasks.addListener(new ListChangeListener<Task<Void>>() {
 
 			@Override
@@ -103,9 +101,6 @@ public class MainApp extends Application {
 			}
 			
 		});
-
-		logic = new PuzzleLogic(this);
-		ruleFactory = new RuleFactory(this);
 	}
 	
 	public Stage getPrimaryStage() {
@@ -192,9 +187,6 @@ public class MainApp extends Application {
 			l = opt2;
 		}
 		
-		System.out.println(cat1 + " " + cat2);
-		System.out.println(i + " " + k + " " + j + " " + l);
-		
 		Task<Void> task = new Task<Void>() {
 		    @Override
 		    protected Void call() throws Exception {
@@ -204,7 +196,6 @@ public class MainApp extends Application {
 		};
 		
 		tasks.add(task);
-		//board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(2);
 	}
 
 	public void showMiss(int cat1, int opt1, int cat2, int opt2) {
@@ -220,8 +211,6 @@ public class MainApp extends Application {
 			j = cat2;
 			l = opt2;
 		}
-		System.out.println(cat1 + " " + cat2);
-		System.out.println(i + " " + k + " " + j + " " + l);
 		
 		Task<Void> task = new Task<Void>() {
 		    @Override
@@ -232,7 +221,6 @@ public class MainApp extends Application {
 		};
 		
 		tasks.add(task);
-		//board.get(new OptionIndex(i, k)).get(new OptionIndex(j,l)).set(0);
 	}
 	
 	public static void main(String[] args) {
@@ -282,17 +270,17 @@ public class MainApp extends Application {
         }
 	}
 
-	public void showLogicBoardOverview() {
+	public void showLogicPuzzleSummary() {
         try {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/LogicBoardOverview.fxml"));
-            AnchorPane personOverview = (AnchorPane) loader.load();
+            loader.setLocation(MainApp.class.getResource("view/LogicPuzzleSummary.fxml"));
+            AnchorPane overview = (AnchorPane) loader.load();
 
             // Set person overview into the center of root layout.
-            rootLayout.setCenter(personOverview);
+            rootLayout.setCenter(overview);
             
-            LogicBoardOverviewController controller = loader.getController();
+            LogicPuzzleSummaryController controller = loader.getController();
             controller.setMainApp(this);
         } catch (IOException e) {
             e.printStackTrace();
@@ -352,7 +340,7 @@ public class MainApp extends Application {
 		if (categoryCount < categoryNumber.get()) {
 			showCategoryOptionInput();
 		} else {
-			showLogicBoardOverview();
+			showLogicPuzzleSummary();
 		}
 	}
 	
@@ -371,7 +359,6 @@ public class MainApp extends Application {
             dialogStage.setScene(scene);
             
             NumericOptionDialogController controller = loader.getController();
-            controller.setMainApp(this);
             controller.setDialogStage(dialogStage);
             dialogStage.showAndWait();
             
@@ -607,6 +594,7 @@ public class MainApp extends Application {
 		options.put(new OptionIndex(i,j), option);
 	}
 	
+	/*
 	public void printBoard() {
 		String str = "";
 		
@@ -659,6 +647,7 @@ public class MainApp extends Application {
 		
 		System.out.println(str);
 	}
+	*/
 	
 	public void deepSolve() {
 		checkCondensers();

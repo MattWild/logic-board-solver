@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane fx:id="logicBoard" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9" fx:controller="presentation.view.LogicBoardViewController">
+	<columnConstraints>
+	   <ColumnConstraints maxWidth="-Infinity" minWidth="-Infinity" prefWidth="35.0" />
+	   <ColumnConstraints maxWidth="-Infinity" minWidth="-Infinity" />
+	</columnConstraints>
+	<rowConstraints>
+	   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="35.0" />
+	   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" />
+	</rowConstraints>
+</GridPane>

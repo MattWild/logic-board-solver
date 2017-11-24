@@ -1,16 +1,11 @@
 package objects;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import exceptions.LogicException;
 import exceptions.SetupException;
-import javafx.animation.PauseTransition;
-import javafx.concurrent.Task;
-import javafx.util.Duration;
 import presentation.MainApp;
 import rules.Rule;
 

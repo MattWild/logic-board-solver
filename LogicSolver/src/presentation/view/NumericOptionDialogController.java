@@ -5,7 +5,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-import presentation.MainApp;
 
 public class NumericOptionDialogController {
 	
@@ -27,17 +26,11 @@ public class NumericOptionDialogController {
 		dialogStage.close();
 	}
 	
-	private String[] computedOptions;
-	private MainApp mainApp;
 	private Stage dialogStage;
 	private boolean hasSubmitted;
 	
 	public NumericOptionDialogController() {
 		hasSubmitted = false;
-	}
-
-	public void setMainApp(MainApp mainApp) {
-		this.mainApp = mainApp;
 	}
 
 	public void setDialogStage(Stage dialogStage) {

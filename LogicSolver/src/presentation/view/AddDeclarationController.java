@@ -2,7 +2,6 @@ package presentation.view;
 
 import java.util.ArrayList;
 
-import exceptions.SetupException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -11,8 +10,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
 import presentation.MainApp;
-import rules.DeclarationRule;
-import rules.Rule;
 
 public class AddDeclarationController {
 	
@@ -59,8 +56,6 @@ public class AddDeclarationController {
 	
 	private MainApp mainApp;
 	private Stage dialogStage;
-
-	private Rule rule;
 	
 	@FXML
 	private void initialize() {

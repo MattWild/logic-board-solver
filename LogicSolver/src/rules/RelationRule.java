@@ -2,8 +2,6 @@ package rules;
 import exceptions.LogicException;
 import exceptions.SetupException;
 import objects.PuzzleLogic;
-import objects.Option;
-import objects.Relation;
 import presentation.MainApp;
 
 /**

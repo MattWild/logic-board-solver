@@ -2,7 +2,6 @@ package presentation.view;
 
 import java.util.ArrayList;
 
-import exceptions.SetupException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -11,8 +10,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
 import presentation.MainApp;
-import rules.DeclarationRule;
-import rules.Rule;
 
 public class AddDoubleRestrictionController {
 	
